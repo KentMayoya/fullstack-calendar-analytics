@@ -1,3 +1,9 @@
+/**
+ * This class handles requests to the "/api" endpoint. The purpose of this class is
+ * to verify the backend application is running and is used for testing.
+ *
+ * Navigating to /api/test displays a simple confirmation message.
+ */
 package app.calendaranalytics.api.controllers;
 
 import org.springframework.web.bind.annotation.GetMapping;
