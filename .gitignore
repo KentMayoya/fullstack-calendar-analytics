@@ -33,3 +33,18 @@ build/
 .vscode/
 
 /backend/src/main/resources/application.properties
+
+# =========================================
+# Frontend - Node/Vite/React
+# =========================================
+# Dependencies
+/frontend/node_modules/
+
+# Build output
+/frontend/dist/
+
+# Test results
+/frontend/coverage/
+
+# Local settings
+/frontend/.pnp.*
