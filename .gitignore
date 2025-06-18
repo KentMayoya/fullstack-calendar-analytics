@@ -1,50 +1,40 @@
-HELP.md
-target/
-.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
+# logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
+# Environment variables
+.env
+.env.*
+*.local
 
-### IntelliJ IDEA ###
-.idea
-*.iws
-*.iml
-*.ipr
+# OS-specific
+.DS_Store
+Thumbs.db
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
-
-### VS Code ###
+# IDE & Editor Configuration
 .vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
 
+# Backend - Java/Maven
+/backend/target/
+*.class
+*.jar
+*.war
+*.ear
+
+# Secrets
 /backend/src/main/resources/application.properties
 
-# =========================================
 # Frontend - Node/Vite/React
-# =========================================
-# Dependencies
 /frontend/node_modules/
-
-# Build output
 /frontend/dist/
-
-# Test results
+/frontend/dist-ssr/
 /frontend/coverage/
-
-# Local settings
 /frontend/.pnp.*
