@@ -1,6 +1,6 @@
 // src/AuthStatus.tsx
 
-import { useUser } from "/src/setup/app-context-manager/user-context";
+import { useUser } from "../setup/app-context-manager/UserContext";
 
 function AuthStatus() {
   const context = useUser();

@@ -1,6 +1,6 @@
-import { UserContextProvider } from "./setup/app-context-manager/user-context";
+import { UserContextProvider } from "./setup/app-context-manager/UserContext";
 import BackendMessage from "./pages/dashboard/components/BackendMessage";
-import AuthStatus from "./pages/dashboard/components/AuthStatus";
+import AuthStatus from "./pages/AuthStatus";
 import "./App.css";
 
 function App() {
