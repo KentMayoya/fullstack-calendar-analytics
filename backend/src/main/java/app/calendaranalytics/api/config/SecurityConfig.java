@@ -34,7 +34,7 @@ public class SecurityConfig {
      * application is a stateless RESTful web-application, CSRF can safely be
      * disabled. This may lead to an increase in performance.
      *
-     * @param http Used to assemble web-security chain. Contains methods to
+     * @param http Used to assemble the web-security chain. Contains methods to
      * register security settings.
      * @return A list of security filters. Each request will pass through this
      * filter.
