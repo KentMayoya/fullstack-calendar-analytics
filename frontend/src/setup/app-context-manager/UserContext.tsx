@@ -89,10 +89,13 @@ export const UserContextProvider = ({
   );
 };
 
+// Custom hook that allows the user to be accessible from other files
 export const useUser = () => {
   const context = useContext(UserContext);
-  if (context === undefined) {
+  if (context === null) {
     throw new Error("useUser must be used within a UserContextProvider");
+    // useUser was attempted to be retreived from a component that was
+    // not wrapped with <UserContextProvider>
   }
   return context;
 };
