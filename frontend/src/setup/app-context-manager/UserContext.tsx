@@ -1,10 +1,24 @@
+// src/setup/app-context-manager/UserContext.tsx
+
 import { createContext, useState, useEffect, useContext } from "react";
 import { createClient } from "@supabase/supabase-js";
-import type { User } from "@supabase/supabase-js";
-import type { SupabaseClient } from "@supabase/supabase-js";
+import type { User, SupabaseClient } from "@supabase/supabase-js";
+
+// Custom users table
+interface Profile {
+  full_name: string;
+  email: string;
+}
+
+// Contains both supabase's users object and
+// our custom users object (Profile)
+interface Session {
+  auth: User;
+  profile: Profile | null;
+}
 
 interface UserContextType {
-  user: User | null;
+  session: Session | null;
   supabase: SupabaseClient;
 }
 
@@ -21,37 +35,57 @@ export const UserContextProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [authUser, setAuthUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
 
   useEffect(() => {
-    // Upon rendering, check if a user was logged in during a previous visit
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-    });
-
-    // A listener that calls setUser whenever authentication happens
+    // A listener that calls setSession whenever authentication happens
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
+      setAuthUser(session?.user ?? null);
+      setLoading(false);
     });
-
     // Cleanup function that stops listening for authentication changes
     // when this component unmounts. UserContextProvider will likely never
     // be unmounted until the user navigates away from the website
     return () => subscription.unsubscribe();
   }, []);
 
+  useEffect(() => {
+    // If a user is logged in, fetch their profile.
+    if (authUser) {
+      supabase
+        .from("users")
+        .select("full_name, email")
+        .eq("id", authUser.id)
+        .single()
+        .then(({ data, error }) => {
+          if (error) {
+            console.error("Error fetching profile:", error);
+          }
+          setProfile(data);
+        });
+    } else {
+      // If the user logs out, clear the profile.
+      setProfile(null);
+    }
+  }, [authUser]);
+
+  const session: Session | null = authUser ? { auth: authUser, profile } : null;
+
   // Give UserContext a value. When another files calls useContext and passes
   // in UserContext, they will get these values.
-  // user is initially null as defined by the useState above.
   const value = {
-    user,
+    session,
     supabase,
   };
 
   return (
-    <UserContext.Provider value={value}> {children} </UserContext.Provider>
+    <UserContext.Provider value={value}>
+      {!loading && children}
+    </UserContext.Provider>
   );
 };
 
