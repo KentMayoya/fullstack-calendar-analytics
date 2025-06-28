@@ -54,23 +54,23 @@ export const UserContextProvider = ({
   }, []);
 
   useEffect(() => {
-    // If a user is logged in, fetch their profile.
-    if (authUser) {
-      supabase
-        .from("users")
-        .select("full_name, email")
-        .eq("id", authUser.id)
-        .single()
-        .then(({ data, error }) => {
-          if (error) {
-            console.error("Error fetching profile:", error);
-          }
-          setProfile(data);
-        });
-    } else {
-      // If the user logs out, clear the profile.
-      setProfile(null);
-    }
+    const fetchProfile = async () => {
+      // If a user is logged in, fetch their profile.
+      if (authUser) {
+        const { data, error } = await supabase
+          .from("users")
+          .select("full_name, email")
+          .eq("id", authUser.id)
+          .single();
+        if (error) {
+          console.error("Error fetching profile:", error);
+        }
+        setProfile(data);
+      } else {
+        setProfile(null);
+      }
+    };
+    fetchProfile();
   }, [authUser]);
 
   const session: Session | null = authUser ? { auth: authUser, profile } : null;
