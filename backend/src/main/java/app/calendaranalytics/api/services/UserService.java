@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
+import app.calendaranalytics.api.dtos.UserDto;
 import app.calendaranalytics.api.entities.User;
 import app.calendaranalytics.api.repositories.UserRepository;
 
@@ -33,7 +34,18 @@ public class UserService {
      * @return Contains a User if a matching userId is found. Otherwise returns
      * an empty Optional object.
      */
-    public Optional<User> findUserById(UUID userId) {
-        return userRepository.findById(userId);
+    public Optional<UserDto> findUserById(UUID userId) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        return userOptional.map(this::mapToDto);
+    }
+
+    /**
+     * Helper method that maps the private User Entity to the public UserDto.
+     */
+    private UserDto mapToDto(User userEntity) {
+        UserDto dto = new UserDto();
+        dto.setFullName(userEntity.getFullName());
+        dto.setEmail(userEntity.getEmail());
+        return dto;
     }
 }
