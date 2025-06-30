@@ -6,11 +6,17 @@ function BackendMessage() {
   const [message, setMessage] = useState<string>("");
 
   useEffect(() => {
-    // This endpoint is defined in TestController
-    fetch(`${API_BASE_URL}/api/test`)
-      .then((response) => response.text())
-      .then((data) => setMessage(data))
-      .catch((error) => console.error("Error fetching data:", error));
+    const fetchData = async () => {
+      try {
+        // This endpoint is defined in TestController
+        const response = await fetch(`${API_BASE_URL}/api/test`);
+        const data = await response.text();
+        setMessage(data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+    fetchData();
   }, []);
 
   return (

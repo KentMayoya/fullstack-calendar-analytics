@@ -64,6 +64,8 @@ export const UserContextProvider = ({
           .single();
         if (error) {
           console.error("Error fetching profile:", error);
+          setProfile(null);
+          return;
         }
         setProfile(data);
       } else {
@@ -94,7 +96,7 @@ export const useUser = () => {
   const context = useContext(UserContext);
   if (context === null) {
     throw new Error("useUser must be used within a UserContextProvider");
-    // useUser was attempted to be retreived from a component that was
+    // useUser was attempted to be retrieved from a component that was
     // not wrapped with <UserContextProvider>
   }
   return context;
