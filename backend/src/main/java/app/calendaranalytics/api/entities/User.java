@@ -10,6 +10,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * This class represents the public.users class defined in Supabase.
+ */
 @Entity
 @Getter
 @Setter
