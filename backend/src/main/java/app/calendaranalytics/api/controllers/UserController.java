@@ -31,7 +31,7 @@ public class UserController {
     }
 
     /**
-     *
+     * Retrieves the user from Supabase using the current session.
      *
      * @param authentication An object provided by the Spring Security
      * framework. Contains all the information regarding the currently logged-in
@@ -46,5 +46,4 @@ public class UserController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
-
 }
