@@ -1,30 +1,48 @@
-/**
- * This class configures the Spring Security dependency, which protects the application's
- * endpoints. Without this class, the user will be met with a login page for every
- * endpoint.
- *
- * The @Configuration annotation tells Spring Boot that this class will contain at least
- * one Bean definition.
- *
- * The @EnableWebSecurity imports Spring Boot's web security configuration, which enables
- * the enforcement of authentication and authorization.
- */
 package app.calendaranalytics.api.config;
 
 import java.util.Arrays;
 
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import static org.springframework.security.config.Customizer.withDefaults;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+/**
+ * This class configures the Spring Security dependency, which protects the
+ * application's endpoints and verifies JWTs. Without this class, the user will
+ * be met with a login page for every endpoint.
+ *
+ * The @Configuration annotation tells Spring Boot that this class will contain
+ * at least one Bean definition.
+ *
+ * The @EnableWebSecurity imports Spring Boot's web security configuration,
+ * which enables the enforcement of authentication and authorization.
+ */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    // Retrieves jwt secret from application.properties
+    @Value("${supabase.jwt.secret}")
+    private String jwtSecret;
+
+    // Configures the JWTDecoder with a secret key for verifying the JWT signature
+    @Bean
+    public JwtDecoder jwtDecoder() {
+        SecretKeySpec secretKey = new SecretKeySpec(jwtSecret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
+        return NimbusJwtDecoder.withSecretKey(secretKey).build();
+    }
 
     /**
      * Configures the security of the application's endpoints.
@@ -45,6 +63,7 @@ public class SecurityConfig {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
+                .oauth2ResourceServer(oauth2 -> oauth2.jwt(withDefaults()))
                 .authorizeHttpRequests(authorize -> authorize
                 // Exposes "/api/test" as a public endpoint.
                 .requestMatchers("/api/test").permitAll()

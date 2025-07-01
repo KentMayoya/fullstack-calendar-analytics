@@ -6,7 +6,7 @@ import type { User, SupabaseClient } from "@supabase/supabase-js";
 
 // Custom users table
 interface Profile {
-  full_name: string;
+  fullName: string;
   email: string;
 }
 
@@ -15,6 +15,7 @@ interface Profile {
 interface Session {
   auth: User;
   profile: Profile | null;
+  access_token: string;
 }
 
 interface UserContextType {
@@ -22,10 +23,11 @@ interface UserContextType {
   supabase: SupabaseClient;
 }
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Make UserContext available to other files.
 export const UserContext = createContext<UserContextType | null>(null);
@@ -35,47 +37,47 @@ export const UserContextProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
+  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [authUser, setAuthUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
 
   useEffect(() => {
     // A listener that calls setSession whenever authentication happens
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setAuthUser(session?.user ?? null);
-      setLoading(false);
+    } = supabase.auth.onAuthStateChange(async (_event, supabaseSession) => {
+      try {
+        if (supabaseSession?.user) {
+          const response = await fetch(`${API_BASE_URL}/api/user/me`, {
+            headers: {
+              Authorization: `Bearer ${supabaseSession.access_token}`,
+            },
+          });
+          if (!response.ok) {
+            throw new Error(
+              `Failed to fetch user profile. Status: ${response.status}`
+            );
+          }
+          const profile = await response.json();
+          setSession({
+            auth: supabaseSession.user,
+            profile: profile,
+            access_token: supabaseSession.access_token,
+          });
+        } else {
+          setSession(null);
+        }
+      } catch (error) {
+        console.error("Error setting up session: ", error);
+        setSession(null);
+      } finally {
+        setLoading(false);
+      }
     });
     // Cleanup function that stops listening for authentication changes
     // when this component unmounts. UserContextProvider will likely never
     // be unmounted until the user navigates away from the website
     return () => subscription.unsubscribe();
   }, []);
-
-  useEffect(() => {
-    const fetchProfile = async () => {
-      // If a user is logged in, fetch their profile.
-      if (authUser) {
-        const { data, error } = await supabase
-          .from("users")
-          .select("full_name, email")
-          .eq("id", authUser.id)
-          .single();
-        if (error) {
-          console.error("Error fetching profile:", error);
-          setProfile(null);
-          return;
-        }
-        setProfile(data);
-      } else {
-        setProfile(null);
-      }
-    };
-    fetchProfile();
-  }, [authUser]);
-
-  const session: Session | null = authUser ? { auth: authUser, profile } : null;
 
   // Give UserContext a value. When another files calls useContext and passes
   // in UserContext, they will get these values.
