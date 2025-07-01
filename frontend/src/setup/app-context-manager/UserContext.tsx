@@ -44,12 +44,12 @@ export const UserContextProvider = ({
     // A listener that calls setSession whenever authentication happens
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (_event, supabaseSession) => {
       try {
-        if (session?.user) {
+        if (supabaseSession?.user) {
           const response = await fetch(`${API_BASE_URL}/api/user/me`, {
             headers: {
-              Authorization: `Bearer ${session.access_token}`,
+              Authorization: `Bearer ${supabaseSession.access_token}`,
             },
           });
           if (!response.ok) {
@@ -59,9 +59,9 @@ export const UserContextProvider = ({
           }
           const profile = await response.json();
           setSession({
-            auth: session.user,
+            auth: supabaseSession.user,
             profile: profile,
-            access_token: session.access_token,
+            access_token: supabaseSession.access_token,
           });
         } else {
           setSession(null);
