@@ -15,5 +15,5 @@ import app.calendaranalytics.api.entities.User;
  * object defined in the entities package.
  */
 public interface UserRepository extends JpaRepository<User, UUID> {
-
+    // This interface is intentionally empty.
 }
