@@ -6,7 +6,7 @@ import type { User, SupabaseClient } from "@supabase/supabase-js";
 
 // Custom users table
 interface Profile {
-  full_name: string;
+  fullName: string;
   email: string;
 }
 

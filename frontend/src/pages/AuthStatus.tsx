@@ -30,7 +30,7 @@ function AuthStatus() {
             Even if session is not null, profile still could be.
             Therefore, if profile is null, display the email.
         */}
-        <p>Welcome, {session.profile?.full_name || session.auth.email}</p>
+        <p>Welcome, {session.profile?.fullName || session.auth.email}</p>
         <button onClick={handleLogout}>Sign Out</button>
       </div>
     );
