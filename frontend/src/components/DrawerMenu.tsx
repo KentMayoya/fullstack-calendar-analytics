@@ -1,4 +1,5 @@
-import { Drawer, List, ListItem, ListItemText } from "@mui/material";
+import { NavLink } from "react-router-dom";
+import { Drawer, List, ListItemButton, ListItemText } from "@mui/material";
 import { useUser } from "../setup/app-context-manager/UserContext";
 
 type DrawerMenuProps = {
@@ -6,9 +7,19 @@ type DrawerMenuProps = {
   onClose: () => void;
 };
 
+const menuItems = [
+  { text: "Home", path: "/" },
+  { text: "About", path: "/about" },
+];
+
+const authMenuItems = [
+  { text: "Calendar", path: "/calendar" },
+  { text: "Dashboard", path: "/dashboard" },
+  { text: "Settings", path: "/settings" },
+];
+
 const DrawerMenu = ({ open, onClose }: DrawerMenuProps) => {
-  const context = useUser();
-  const { session } = context;
+  const { session } = useUser();
 
   return (
     <Drawer
@@ -21,25 +32,29 @@ const DrawerMenu = ({ open, onClose }: DrawerMenuProps) => {
       }}
     >
       <List>
-        <ListItem>
-          <ListItemText primary="Home" />
-        </ListItem>
-        <ListItem>
-          <ListItemText primary="About" />
-        </ListItem>
-        {session && (
-          <>
-            <ListItem>
-              <ListItemText primary="Calendar" />
-            </ListItem>
-            <ListItem>
-              <ListItemText primary="Dashboard" />
-            </ListItem>
-            <ListItem>
-              <ListItemText primary="Settings" />
-            </ListItem>
-          </>
-        )}
+        {menuItems.map(({ text, path }) => (
+          <ListItemButton
+            key={path}
+            component={NavLink}
+            to={path}
+            onClick={onClose}
+            selected={location.pathname === path}
+          >
+            <ListItemText primary={text}></ListItemText>
+          </ListItemButton>
+        ))}
+        {session &&
+          authMenuItems.map(({ text, path }) => (
+            <ListItemButton
+              key={path}
+              component={NavLink}
+              to={path}
+              onClick={onClose}
+              selected={location.pathname === path}
+            >
+              <ListItemText primary={text} />
+            </ListItemButton>
+          ))}
       </List>
     </Drawer>
   );
