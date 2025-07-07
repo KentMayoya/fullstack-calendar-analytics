@@ -47,7 +47,7 @@ export const UserContextProvider = ({
     } = supabase.auth.onAuthStateChange(async (_event, supabaseSession) => {
       try {
         if (supabaseSession?.user) {
-          const response = await fetch(`${API_BASE_URL}/api/user/me`, {
+          const response = await fetch(`${API_BASE_URL}/api/v1/users/me`, {
             headers: {
               Authorization: `Bearer ${supabaseSession.access_token}`,
             },

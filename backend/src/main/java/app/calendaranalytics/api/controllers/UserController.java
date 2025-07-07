@@ -15,7 +15,7 @@ import app.calendaranalytics.api.services.UserService;
  * Defines the API endpoint for retrieving the user's details from Supabase.
  */
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/api/v1/users")
 public class UserController {
 
     // A Spring-managed Bean that provides data access methods for the User entity.
