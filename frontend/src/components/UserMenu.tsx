@@ -1,11 +1,13 @@
 import { useUser } from "../setup/app-context-manager/UserContext";
 import { useState } from "react";
 import { IconButton, Avatar, Typography, Menu, MenuItem } from "@mui/material";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import LoginIcon from "@mui/icons-material/Login";
 
 const UserMenu = () => {
   const { session, handleLogin, handleLogout } = useUser();
+
+  const navigate = useNavigate();
 
   // The HTML element the menu will anchor to (the profile picture)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -22,6 +24,13 @@ const UserMenu = () => {
   // Sets anchorEl to null, therefore closing the menu
   const handleClose = () => {
     setAnchorEl(null);
+  };
+
+  // Closes the profile menu and redirects the user to the home page
+  const handleLogoutClick = async () => {
+    await handleLogout();
+    handleClose();
+    navigate("/");
   };
 
   if (!session) {
@@ -66,14 +75,7 @@ const UserMenu = () => {
         >
           Settings
         </MenuItem>
-        <MenuItem
-          onClick={() => {
-            handleLogout();
-            handleClose();
-          }}
-        >
-          Sign out
-        </MenuItem>
+        <MenuItem onClick={handleLogoutClick}>Sign out</MenuItem>
       </Menu>
     </>
   );
