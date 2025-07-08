@@ -21,6 +21,8 @@ interface Session {
 interface UserContextType {
   session: Session | null;
   supabase: SupabaseClient;
+  handleLogin: () => Promise<void>;
+  handleLogout: () => Promise<void>;
 }
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
@@ -28,6 +30,14 @@ const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const handleLogin = async () => {
+  await supabase.auth.signInWithOAuth({ provider: "google" });
+};
+
+const handleLogout = async () => {
+  await supabase.auth.signOut();
+};
 
 // Make UserContext available to other files.
 export const UserContext = createContext<UserContextType | null>(null);
@@ -84,6 +94,8 @@ export const UserContextProvider = ({
   const value = {
     session,
     supabase,
+    handleLogin,
+    handleLogout,
   };
 
   return (

@@ -6,8 +6,7 @@ import DrawerMenu from "./DrawerMenu";
 import { useUser } from "../setup/app-context-manager/UserContext";
 
 const Header = () => {
-  const { session } = useUser();
-
+  const { session, handleLogin, handleLogout } = useUser();
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
 
   return (
@@ -24,6 +23,7 @@ const Header = () => {
           </IconButton>
           <IconButton
             color="inherit"
+            onClick={session ? handleLogout : handleLogin}
             sx={{
               marginLeft: "auto",
               display: "flex",
