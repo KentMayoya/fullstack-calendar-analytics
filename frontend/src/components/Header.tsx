@@ -1,12 +1,10 @@
 import { useState } from "react";
-import { AppBar, Toolbar, IconButton, Avatar, Typography } from "@mui/material";
+import { AppBar, Toolbar, IconButton } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import LoginIcon from "@mui/icons-material/Login";
 import DrawerMenu from "./DrawerMenu";
-import { useUser } from "../setup/app-context-manager/UserContext";
+import UserMenu from "./UserMenu";
 
 const Header = () => {
-  const { session, handleLogin, handleLogout } = useUser();
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
 
   return (
@@ -21,26 +19,7 @@ const Header = () => {
           >
             <MenuIcon />
           </IconButton>
-          <IconButton
-            color="inherit"
-            onClick={session ? handleLogout : handleLogin}
-            sx={{
-              marginLeft: "auto",
-              display: "flex",
-              alignItems: "center",
-              gap: 1,
-            }}
-          >
-            {session && (
-              <Avatar src={session?.auth?.user_metadata?.avatar_url}> </Avatar>
-            )}
-            {!session && (
-              <>
-                <Typography>Sign in</Typography>
-                <LoginIcon />
-              </>
-            )}
-          </IconButton>
+          <UserMenu />
         </Toolbar>
       </AppBar>
       <DrawerMenu
