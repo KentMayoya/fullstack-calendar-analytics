@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import { Drawer, List, ListItemButton, ListItemText } from "@mui/material";
 import { useUser } from "../setup/app-context-manager/UserContext";
 
@@ -20,6 +20,7 @@ const authMenuItems = [
 
 const DrawerMenu = ({ open, onClose }: DrawerMenuProps) => {
   const { session } = useUser();
+  const location = useLocation();
 
   return (
     <Drawer
