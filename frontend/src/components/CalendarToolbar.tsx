@@ -3,7 +3,19 @@ import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 
-const CalendarToolbar = () => {
+interface CalendarToolbarProps {
+  title: string;
+  onPrevClick: () => void;
+  onTodayClick: () => void;
+  onNextClick: () => void;
+}
+
+const CalendarToolbar = ({
+  title,
+  onPrevClick,
+  onTodayClick,
+  onNextClick,
+}: CalendarToolbarProps) => {
   return (
     <>
       <AppBar
@@ -13,6 +25,7 @@ const CalendarToolbar = () => {
       >
         <Toolbar>
           <IconButton
+            onClick={onPrevClick}
             sx={{
               border: "2px solid",
               borderColor: "black",
@@ -24,6 +37,7 @@ const CalendarToolbar = () => {
             <ChevronLeftIcon />
           </IconButton>
           <Button
+            onClick={onTodayClick}
             sx={{
               color: "black",
               border: "2px solid black",
@@ -36,6 +50,7 @@ const CalendarToolbar = () => {
             Today
           </Button>
           <IconButton
+            onClick={onNextClick}
             sx={{
               border: "2px solid",
               borderColor: "black",
@@ -46,7 +61,7 @@ const CalendarToolbar = () => {
           >
             <ChevronRightIcon />
           </IconButton>
-          <Typography sx={{ mx: "auto" }}>Today's Date</Typography>
+          <Typography sx={{ mx: "auto" }}>{title}</Typography>
           <IconButton>
             <CalendarMonthIcon />
           </IconButton>
