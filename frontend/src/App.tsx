@@ -1,11 +1,14 @@
 import BackendMessage from "./components/BackendMessage";
 import AuthStatus from "./pages/AuthStatus";
+import { Typography } from "@mui/material";
 import "./App.css";
+import Header from "./components/Header";
 
 function App() {
   return (
     <>
-      <h1>Full-Stack Calendar Analytics</h1>
+      <Header></Header>
+      <Typography>Full-Stack Calendar Analytics</Typography>
       <AuthStatus />
       <BackendMessage />
     </>

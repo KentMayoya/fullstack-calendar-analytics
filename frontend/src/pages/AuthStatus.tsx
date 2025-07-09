@@ -10,15 +10,7 @@ function AuthStatus() {
     // As context is a hook, this code will rerun when its state changes.
   }
 
-  const { session, supabase } = context;
-
-  const handleLogin = async () => {
-    await supabase.auth.signInWithOAuth({ provider: "google" });
-  };
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-  };
+  const { session, handleLogin, handleLogout } = context;
 
   // If the user is authenticated, display the user's email
   // and a sign out button.
