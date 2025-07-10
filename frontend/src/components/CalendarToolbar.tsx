@@ -1,7 +1,7 @@
 import { AppBar, Button, IconButton, Toolbar, Typography } from "@mui/material";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
+import CalendarMenu from "./CalendarMenu";
 
 interface CalendarToolbarProps {
   title: string;
@@ -62,9 +62,7 @@ const CalendarToolbar = ({
             <ChevronRightIcon />
           </IconButton>
           <Typography sx={{ mx: "auto" }}>{title}</Typography>
-          <IconButton>
-            <CalendarMonthIcon />
-          </IconButton>
+          <CalendarMenu />
         </Toolbar>
       </AppBar>
     </>
