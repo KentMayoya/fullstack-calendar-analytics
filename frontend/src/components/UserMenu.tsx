@@ -1,8 +1,9 @@
 import { useUser } from "../setup/app-context-manager/UserContext";
 import { useState } from "react";
-import { IconButton, Avatar, Typography, Menu, MenuItem } from "@mui/material";
-import { NavLink, useNavigate } from "react-router-dom";
+import { IconButton, Avatar, Typography } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 import LoginIcon from "@mui/icons-material/Login";
+import ReusableMenu from "./ReusableMenu";
 
 const UserMenu = () => {
   const { session, handleLogin, handleLogout } = useUser();
@@ -32,6 +33,20 @@ const UserMenu = () => {
     handleClose();
     navigate("/");
   };
+
+  const menuItems = [
+    {
+      label: "Settings",
+      onClick: () => {
+        navigate("/settings");
+        handleClose();
+      },
+    },
+    {
+      label: "Sign out",
+      onClick: handleLogoutClick,
+    },
+  ];
 
   if (!session) {
     // User is not authenticated. Provide the user with the option to log in.
@@ -65,18 +80,12 @@ const UserMenu = () => {
       >
         <Avatar src={session.auth.user_metadata.avatar_url} alt="User avatar" />
       </IconButton>
-      <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
-        <MenuItem
-          component={NavLink}
-          to="/settings"
-          onClick={() => {
-            handleClose();
-          }}
-        >
-          Settings
-        </MenuItem>
-        <MenuItem onClick={handleLogoutClick}>Sign out</MenuItem>
-      </Menu>
+      <ReusableMenu
+        anchorEl={anchorEl}
+        open={open}
+        onClose={handleClose}
+        menuItems={menuItems}
+      />
     </>
   );
 };
