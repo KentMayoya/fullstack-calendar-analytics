@@ -22,9 +22,9 @@ public class UserController {
     private final UserService userService;
 
     /**
-     * Constructs the UserService with a dependency on the UserRepository.
+     * Constructs the UserController with a dependency on the UserService.
      *
-     * @param userRepository The repository responsible for user data access.
+     * @param userService The service managing user-related business logic.
      */
     public UserController(UserService userService) {
         this.userService = userService;
