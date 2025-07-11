@@ -39,7 +39,9 @@ const Header = () => {
                 },
               }}
             >
-              <Typography variant="h6">Calendar Analytics</Typography>
+              <Typography component="h1" variant="h6">
+                Calendar Analytics
+              </Typography>
             </Button>
           </Box>
           <UserMenu />
