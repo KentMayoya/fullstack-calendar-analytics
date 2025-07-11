@@ -1,5 +1,3 @@
-// src/pages/AuthStatus.tsx
-
 import { useUser } from "../setup/app-context-manager/UserContext";
 
 function AuthStatus() {
