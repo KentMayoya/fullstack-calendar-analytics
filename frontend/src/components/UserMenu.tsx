@@ -1,30 +1,16 @@
 import { useUser } from "../setup/app-context-manager/UserContext";
-import { useState } from "react";
-import { IconButton, Avatar, Typography, Menu, MenuItem } from "@mui/material";
-import { NavLink, useNavigate } from "react-router-dom";
+import { IconButton, Avatar, Typography } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 import LoginIcon from "@mui/icons-material/Login";
+import ReusableMenu from "./ReusableMenu";
+import { useMenu } from "../hooks/useMenu";
 
 const UserMenu = () => {
   const { session, handleLogin, handleLogout } = useUser();
 
   const navigate = useNavigate();
 
-  // The HTML element the menu will anchor to (the profile picture)
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-
-  // If anchorEl is null, open is false, otherwise is true. When anchorEl's
-  // state changes, this component re-renders, setting open to its updated value
-  const open = Boolean(anchorEl);
-
-  // Stores the HTMLElement into anchorEl
-  const handleOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  // Sets anchorEl to null, therefore closing the menu
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
+  const { anchorEl, open, handleOpen, handleClose } = useMenu();
 
   // Closes the profile menu and redirects the user to the home page
   const handleLogoutClick = async () => {
@@ -32,6 +18,20 @@ const UserMenu = () => {
     handleClose();
     navigate("/");
   };
+
+  const menuItems = [
+    {
+      label: "Settings",
+      onClick: () => {
+        navigate("/settings");
+        handleClose();
+      },
+    },
+    {
+      label: "Sign out",
+      onClick: handleLogoutClick,
+    },
+  ];
 
   if (!session) {
     // User is not authenticated. Provide the user with the option to log in.
@@ -65,18 +65,12 @@ const UserMenu = () => {
       >
         <Avatar src={session.auth.user_metadata.avatar_url} alt="User avatar" />
       </IconButton>
-      <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
-        <MenuItem
-          component={NavLink}
-          to="/settings"
-          onClick={() => {
-            handleClose();
-          }}
-        >
-          Settings
-        </MenuItem>
-        <MenuItem onClick={handleLogoutClick}>Sign out</MenuItem>
-      </Menu>
+      <ReusableMenu
+        anchorEl={anchorEl}
+        open={open}
+        onClose={handleClose}
+        menuItems={menuItems}
+      />
     </>
   );
 };
