@@ -1,9 +1,11 @@
 package app.calendaranalytics.api.repositories;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 import app.calendaranalytics.api.entities.Calendar;
 
@@ -17,7 +19,21 @@ import app.calendaranalytics.api.entities.Calendar;
  */
 public interface CalendarRepository extends JpaRepository<Calendar, UUID> {
 
-    // Spring Data JPA will automatically generate a query that finds all 
-    // Calendars related to the userId
+    /**
+     * Queries for a list of calendars that belong to the specified user.
+     *
+     * @param userId The user the calendars belong to.
+     * @return A list of Calendars.
+     */
     List<Calendar> findAllByUserId(UUID userId);
+
+    /**
+     * Queries the specified calendar belonging to the specified user.
+     *
+     * @param id The calendar id to search for.
+     * @param userId The user the calendar belongs to.
+     * @return A calendar that matches the id and userId if a match is found.
+     */
+    @Transactional
+    Optional<Calendar> findByIdAndUserId(UUID id, UUID userId);
 }

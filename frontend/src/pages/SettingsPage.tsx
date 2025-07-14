@@ -6,7 +6,6 @@ import {
   Switch,
   Button,
   CircularProgress,
-  FormControlLabel,
 } from "@mui/material";
 import { useUser } from "../setup/app-context-manager/UserContext";
 import { Navigate } from "react-router-dom";
@@ -27,11 +26,13 @@ const SettingsPage = () => {
 
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
+  // If the session has no access token, return nothing
   useEffect(() => {
     if (!session?.access_token) {
       return;
     }
 
+    // Calls /api/v1/calendars to fetch calendars
     const fetchCalendars = async () => {
       try {
         setLoading(true);
@@ -54,6 +55,48 @@ const SettingsPage = () => {
     fetchCalendars();
   }, [session?.access_token]);
 
+  const handleToggleSync = async (
+    calendarId: string,
+    currentStatus: boolean
+  ) => {
+    console.log("handleToggleSync triggered");
+    if (!session?.access_token) {
+      console.log("no access token. returning");
+      return;
+    }
+    // Traverse through the list of calendars. Switch the sync status of the
+    // calendar that is toggled. This takes place before the API call.
+    setCalendars((currentCalendars) =>
+      currentCalendars.map((calendar) =>
+        calendar.id === calendarId
+          ? { ...calendar, isSynced: !currentStatus }
+          : calendar
+      )
+    );
+    console.log(`fetching /api/v1/calendars/${calendarId}`);
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/api/v1/calendars/${calendarId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ isSynced: !currentStatus }),
+        }
+      );
+      if (!response.ok) {
+        throw new Error(`API call failed with status: ${response.status}`);
+      } else {
+        console.log("success?");
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  // If the user does not have a valid session, redirect to the home page
   if (!session?.auth) {
     return <Navigate to="/" replace />;
   }
@@ -116,7 +159,12 @@ const SettingsPage = () => {
               }}
             >
               <Typography>{calendar.name}</Typography>
-              <Switch checked={calendar.isSynced}></Switch>
+              <Switch
+                checked={calendar.isSynced ?? false}
+                onChange={() =>
+                  handleToggleSync(calendar.id, calendar.isSynced)
+                }
+              ></Switch>
             </Box>
           ))}
         </Box>

@@ -5,9 +5,11 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import app.calendaranalytics.api.dtos.CalendarDto;
 import app.calendaranalytics.api.entities.Calendar;
+import app.calendaranalytics.api.exception.ResourceNotFoundException;
 import app.calendaranalytics.api.repositories.CalendarRepository;
 
 /**
@@ -56,5 +58,26 @@ public class CalendarService {
         dto.setColor(calendar.getColor());
         dto.setSynced(calendar.isSynced());
         return dto;
+    }
+
+    /**
+     * Updates a calendar's sync status.
+     *
+     * @param calendarId The calendar Id to update.
+     * @param userId The user to search for a matching calendar.
+     * @param isSynced Whether to sync events for this calendar or not.
+     * @return A CalendarDto with the updated sync status.
+     * @throws ResourceNotFoundException If the calendarId is not valid, or does
+     * not belong to the userId.
+     */
+    @Transactional
+    public CalendarDto updateSyncStatus(UUID calendarId, UUID userId,
+            boolean isSynced) {
+        Calendar calendar = calendarRepository.findByIdAndUserId(calendarId,
+                userId).orElseThrow(() -> new ResourceNotFoundException(
+                "Calendar not found with id: " + calendarId));
+        calendar.setSynced(isSynced);
+        calendarRepository.save(calendar);
+        return mapToDto(calendar);
     }
 }
