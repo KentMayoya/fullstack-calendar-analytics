@@ -3,3 +3,5 @@ spring.datasource.url=jdbc:postgresql://your-db-host:your-db-port/your-db-name
 spring.datasource.username=your-db-username
 spring.datasource.password=your-db-password
 supabase.jwt.secret=your-jwt-secret
+google.client.id=your-google-client-id
+google.client.secret=your-google-client-secret
