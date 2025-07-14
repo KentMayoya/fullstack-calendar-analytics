@@ -73,7 +73,6 @@ const SettingsPage = () => {
           : calendar
       )
     );
-    console.log(`fetching /api/v1/calendars/${calendarId}`);
     try {
       const response = await fetch(
         `${API_BASE_URL}/api/v1/calendars/${calendarId}`,

@@ -1,5 +1,7 @@
 package app.calendaranalytics.api.dtos;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -7,5 +9,6 @@ import lombok.Setter;
 @Setter
 public class UpdateCalendarDto {
 
+    @JsonProperty("isSynced")
     private boolean isSynced;
 }

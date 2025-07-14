@@ -2,6 +2,8 @@ package app.calendaranalytics.api.dtos;
 
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,5 +23,6 @@ public class CalendarDto {
     private String name;
     private String description;
     private String color;
+    @JsonProperty("isSynced")
     private boolean isSynced;
 }
