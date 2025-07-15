@@ -31,37 +31,58 @@ const SettingsPage = () => {
     if (!session?.access_token) {
       return;
     }
-
-    // Calls /api/v1/calendars to fetch calendars
-    const fetchCalendars = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch(`${API_BASE_URL}/api/v1/calendars`, {
-          headers: {
-            Authorization: `Bearer ${session.access_token}`,
-          },
-        });
-        if (!response.ok) {
-          throw new Error("Failed to fetch calendars");
-        }
-        const data = await response.json();
-        setCalendars(data);
-      } catch (err: any) {
-        console.log(err);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchCalendars();
   }, [session?.access_token]);
+
+  const fetchGoogleCalendars = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/calendars/sync`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error("Failed to fetch calendars");
+      }
+      await fetchCalendars();
+    } catch (err: any) {
+      // do something
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Calls /api/v1/calendars to fetch calendars
+  const fetchCalendars = async () => {
+    try {
+      setLoading(true);
+      if (!session?.access_token) {
+        throw new Error("No access token available");
+      }
+      const response = await fetch(`${API_BASE_URL}/api/v1/calendars`, {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error("Failed to fetch calendars");
+      }
+      const data = await response.json();
+      setCalendars(data);
+    } catch (err: any) {
+      console.log(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleToggleSync = async (
     calendarId: string,
     currentStatus: boolean
   ) => {
-    console.log("handleToggleSync triggered");
     if (!session?.access_token) {
-      console.log("no access token. returning");
       return;
     }
     // Traverse through the list of calendars. Switch the sync status of the
@@ -87,8 +108,6 @@ const SettingsPage = () => {
       );
       if (!response.ok) {
         throw new Error(`API call failed with status: ${response.status}`);
-      } else {
-        console.log("success?");
       }
     } catch (err) {
       console.log(err);
@@ -145,7 +164,11 @@ const SettingsPage = () => {
       >
         Calendar Sync Settings
       </Typography>
-      {loading && <CircularProgress />}
+      {loading && (
+        <Box>
+          <CircularProgress />
+        </Box>
+      )}
       {!loading && !error && (
         <Box>
           {calendars.map((calendar) => (
@@ -168,7 +191,11 @@ const SettingsPage = () => {
           ))}
         </Box>
       )}
-      <Button variant="contained" color="primary">
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={fetchGoogleCalendars}
+      >
         Load Calendars
       </Button>
       <Divider sx={{ my: 2 }} />

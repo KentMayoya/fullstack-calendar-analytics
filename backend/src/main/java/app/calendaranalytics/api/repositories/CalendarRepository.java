@@ -36,4 +36,15 @@ public interface CalendarRepository extends JpaRepository<Calendar, UUID> {
      */
     @Transactional
     Optional<Calendar> findByIdAndUserId(UUID id, UUID userId);
+
+    /**
+     * Queries the specified calendar by Google Calendar id and user id.
+     *
+     * @param googleCalendarId The google calendar Id to query.
+     * @param userId The user the calendar belongs to.
+     * @return A Calendar that matches the googleCalendarId and userId if a
+     * match is found.
+     */
+    @Transactional
+    Optional<Calendar> findByGoogleCalendarIdAndUserId(String googleCalendarId, UUID userId);
 }

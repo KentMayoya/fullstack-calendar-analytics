@@ -1,5 +1,6 @@
 package app.calendaranalytics.api.controllers;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -7,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import app.calendaranalytics.api.dtos.CalendarDto;
 import app.calendaranalytics.api.dtos.UpdateCalendarDto;
+import app.calendaranalytics.api.exception.ResourceNotFoundException;
 import app.calendaranalytics.api.services.CalendarService;
 
 /**
@@ -63,7 +66,7 @@ public class CalendarController {
      * @param authentication An object provided by the Spring Security
      * framework. Contains all the information regarding the currently logged-in
      * user.
-     * @return A CalendarDto containing the updated fields.
+     * @return A CalendarDto containing the updated fields and 200 OK response.
      */
     @PutMapping("/{calendarId}")
     public ResponseEntity<CalendarDto> updateCalendar(@PathVariable UUID calendarId,
@@ -73,4 +76,25 @@ public class CalendarController {
                 calendarId, userId, updateDto.isSynced());
         return ResponseEntity.ok(updatedCalendar);
     }
+
+    /**
+     * Fetches the related user's Google Calendars. If the calendars do not
+     * already exist in the database, the calendars will be inserted.
+     *
+     * @param authentication An object provided by the Spring Security
+     * framework. Contains all the information regarding the currently logged-in
+     * @return A list of CalendarDtos and 200 OK response.
+     * @throws IOException If Google Auth library fails to refresh an access
+     * token.
+     * @throws ResourceNotFoundException If a user or a user's refresh token is
+     * not found.
+     */
+    @PostMapping("/sync")
+    public ResponseEntity<List<CalendarDto>> getGoogleCalendars(
+            Authentication authentication) throws IOException {
+        UUID userId = UUID.fromString(authentication.getName());
+        List<CalendarDto> updatedCalendars = calendarService.syncCalendars(userId);
+        return ResponseEntity.ok(updatedCalendars);
+    }
+
 }

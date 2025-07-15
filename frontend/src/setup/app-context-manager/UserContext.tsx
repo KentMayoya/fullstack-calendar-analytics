@@ -31,14 +31,6 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const handleLogin = async () => {
-  await supabase.auth.signInWithOAuth({ provider: "google" });
-};
-
-const handleLogout = async () => {
-  await supabase.auth.signOut();
-};
-
 // Make UserContext available to other files.
 export const UserContext = createContext<UserContextType | null>(null);
 
@@ -49,6 +41,19 @@ export const UserContextProvider = ({
 }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+
+  const handleLogin = async () => {
+    await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        scopes: "https://www.googleapis.com/auth/calendar.readonly",
+      },
+    });
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+  };
 
   useEffect(() => {
     // A listener that calls setSession whenever authentication happens
@@ -64,7 +69,7 @@ export const UserContextProvider = ({
           });
           if (!response.ok) {
             throw new Error(
-              `Failed to fetch user profile. Status: ${response.status}`
+              `Failed to fetch user profile. Body: ${response.text} Status: ${response.status}`
             );
           }
           const profile = await response.json();
@@ -73,6 +78,24 @@ export const UserContextProvider = ({
             profile: profile,
             access_token: supabaseSession.access_token,
           });
+          if (_event === "SIGNED_IN" && supabaseSession?.user.created_at) {
+            const createdAt = new Date(
+              supabaseSession.user.created_at
+            ).getTime();
+            const now = new Date().getTime();
+            if (now - createdAt < 60000 && supabaseSession.provider_token) {
+              await fetch(`${API_BASE_URL}/api/v1/users/me/token`, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${supabaseSession.access_token}`,
+                },
+                body: JSON.stringify({
+                  refreshToken: supabaseSession.provider_token,
+                }),
+              });
+            }
+          }
         } else {
           setSession(null);
         }
