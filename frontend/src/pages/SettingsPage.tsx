@@ -9,33 +9,21 @@ import {
 } from "@mui/material";
 import { useUser } from "../setup/app-context-manager/UserContext";
 import { Navigate } from "react-router-dom";
-import { useEffect, useState } from "react";
-
-interface Calendar {
-  id: string;
-  name: string;
-  isSynced: boolean;
-}
+import { useState } from "react";
+import { useCalendar } from "../hooks/useCalendar";
 
 const SettingsPage = () => {
   const context = useUser();
   const { session } = context;
-  const [calendars, setCalendars] = useState<Calendar[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string>("");
+  const [isSyncing, setIsSyncing] = useState<boolean>(false);
+  const { setCalendars, calendars, loading, fetchCalendars } = useCalendar();
 
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-  // If the session has no access token, return nothing
-  useEffect(() => {
-    if (!session?.access_token) {
-      return;
-    }
-    fetchCalendars();
-  }, [session?.access_token]);
-
+  // Fetches Google Calendars through the Google Calendar API and calls
+  // fetchCalendars to update the UI
   const fetchGoogleCalendars = async () => {
-    setLoading(true);
+    setIsSyncing(true);
     try {
       const response = await fetch(`${API_BASE_URL}/api/v1/calendars/sync`, {
         method: "POST",
@@ -47,37 +35,15 @@ const SettingsPage = () => {
         throw new Error("Failed to fetch calendars");
       }
       await fetchCalendars();
-    } catch (err: any) {
+    } catch (error) {
+      console.log(error);
       // do something
     } finally {
-      setLoading(false);
+      setIsSyncing(false);
     }
   };
 
-  // Calls /api/v1/calendars to fetch calendars
-  const fetchCalendars = async () => {
-    try {
-      setLoading(true);
-      if (!session?.access_token) {
-        throw new Error("No access token available");
-      }
-      const response = await fetch(`${API_BASE_URL}/api/v1/calendars`, {
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
-      });
-      if (!response.ok) {
-        throw new Error("Failed to fetch calendars");
-      }
-      const data = await response.json();
-      setCalendars(data);
-    } catch (err: any) {
-      console.log(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // Updates the database when a user toggles a switch for a specified calendar
   const handleToggleSync = async (
     calendarId: string,
     currentStatus: boolean
@@ -111,6 +77,14 @@ const SettingsPage = () => {
       }
     } catch (err) {
       console.log(err);
+      // Toggle failed, undo the optimistic UI toggle update.
+      setCalendars((currentCalendars) =>
+        currentCalendars.map((calendar) =>
+          calendar.id === calendarId
+            ? { ...calendar, isSynced: currentStatus }
+            : calendar
+        )
+      );
     }
   };
 
@@ -164,12 +138,12 @@ const SettingsPage = () => {
       >
         Calendar Sync Settings
       </Typography>
-      {loading && (
+      {(loading || isSyncing) && (
         <Box>
           <CircularProgress />
         </Box>
       )}
-      {!loading && !error && (
+      {!loading && !isSyncing && (
         <Box>
           {calendars.map((calendar) => (
             <Box
