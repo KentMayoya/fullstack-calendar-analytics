@@ -50,6 +50,7 @@ public class UserService {
         UserDto dto = new UserDto();
         dto.setFullName(userEntity.getFullName());
         dto.setEmail(userEntity.getEmail());
+        dto.setGoogleTokenSaved(userEntity.isGoogleTokenSaved());
         return dto;
     }
 
@@ -65,6 +66,7 @@ public class UserService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                 "User not found with id: " + userId));
         user.setGoogleRefreshToken(refreshToken);
+        user.setGoogleTokenSaved(true);
         userRepository.save(user);
     }
 }

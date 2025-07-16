@@ -73,29 +73,26 @@ export const UserContextProvider = ({
             );
           }
           const profile = await response.json();
+          if (!profile.isGoogleTokenSaved && supabaseSession.provider_token) {
+            await fetch(`${API_BASE_URL}/api/v1/users/me/token`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${supabaseSession.access_token}`,
+              },
+              body: JSON.stringify({
+                refreshToken: supabaseSession.provider_token,
+              }),
+            });
+          } else {
+            // remove later
+            console.log("Refresh token already exists");
+          }
           setSession({
             auth: supabaseSession.user,
             profile: profile,
             access_token: supabaseSession.access_token,
           });
-          if (_event === "SIGNED_IN" && supabaseSession?.user.created_at) {
-            const createdAt = new Date(
-              supabaseSession.user.created_at
-            ).getTime();
-            const now = new Date().getTime();
-            if (now - createdAt < 60000 && supabaseSession.provider_token) {
-              await fetch(`${API_BASE_URL}/api/v1/users/me/token`, {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  Authorization: `Bearer ${supabaseSession.access_token}`,
-                },
-                body: JSON.stringify({
-                  refreshToken: supabaseSession.provider_token,
-                }),
-              });
-            }
-          }
         } else {
           setSession(null);
         }
