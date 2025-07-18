@@ -1,10 +1,22 @@
+import { useState } from "react";
 import { IconButton } from "@mui/material";
 import ReusableMenu from "./ReusableMenu";
 import { useMenu } from "../hooks/useMenu";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
+import SyncSettingsModal from "./SyncSettingsModal";
 
 const UserMenu = () => {
   const { anchorEl, open, handleOpen, handleClose } = useMenu();
+
+  const [isSyncModalOpen, setIsSyncModalOpen] = useState<boolean>(false);
+
+  const openSyncModal = () => {
+    setIsSyncModalOpen(true);
+  };
+
+  const closeSyncModal = () => {
+    setIsSyncModalOpen(false);
+  };
 
   const menuItems = [
     {
@@ -18,6 +30,7 @@ const UserMenu = () => {
       label: "Sync Settings",
       onClick: () => {
         console.log("sync settings clicked");
+        openSyncModal();
         handleClose();
       },
     },
@@ -38,6 +51,12 @@ const UserMenu = () => {
         onClose={handleClose}
         menuItems={menuItems}
       />
+      {isSyncModalOpen && (
+        <SyncSettingsModal
+          isOpen={isSyncModalOpen}
+          handleClose={closeSyncModal}
+        />
+      )}
     </>
   );
 };

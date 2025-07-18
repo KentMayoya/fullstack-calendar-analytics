@@ -7,7 +7,9 @@ import org.springframework.stereotype.Service;
 
 import app.calendaranalytics.api.dtos.UserDto;
 import app.calendaranalytics.api.entities.User;
+import app.calendaranalytics.api.exception.ResourceNotFoundException;
 import app.calendaranalytics.api.repositories.UserRepository;
+import jakarta.transaction.Transactional;
 
 /**
  * A Service class that handles business logic for the User entity.
@@ -30,7 +32,7 @@ public class UserService {
     /**
      * Queries for a User by its Id.
      *
-     * @param userId The user id to query for in Supabase.
+     * @param userId The user id to query for.
      * @return Contains a User if a matching userId is found. Otherwise returns
      * an empty Optional object.
      */
@@ -41,11 +43,30 @@ public class UserService {
 
     /**
      * Helper method that maps the private User Entity to the public UserDto.
+     *
+     * @param userEntity The User entity to convert.
      */
     private UserDto mapToDto(User userEntity) {
         UserDto dto = new UserDto();
         dto.setFullName(userEntity.getFullName());
         dto.setEmail(userEntity.getEmail());
+        dto.setGoogleTokenSaved(userEntity.isGoogleTokenSaved());
         return dto;
+    }
+
+    /**
+     * Stores a refresh token for the specified user in the database.
+     *
+     * @param userId The user id to query for.
+     * @param refreshToken The refresh token to store.
+     */
+    @Transactional
+    public void saveRefreshToken(UUID userId, String refreshToken) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                "User not found with id: " + userId));
+        user.setGoogleRefreshToken(refreshToken);
+        user.setGoogleTokenSaved(true);
+        userRepository.save(user);
     }
 }

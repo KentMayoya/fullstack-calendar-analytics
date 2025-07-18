@@ -28,4 +28,11 @@ public class User {
 
     @Column(name = "email")
     private String email;
+
+    @Column(name = "is_google_token_saved")
+    private boolean isGoogleTokenSaved;
+
+    @Column(name = "google_refresh_token")
+    private String googleRefreshToken;
+
 }
