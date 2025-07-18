@@ -26,4 +26,19 @@ public class GlobalExceptionHandler {
         body.put("error", ex.getMessage());
         return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
+
+    /**
+     * Handler for ResourceNotFoundException. The response is a JSON object
+     * containing a timestamp and error message.
+     *
+     * @param ex The exception that was thrown.
+     * @return ResponseEntity containing a JSON error body and 400 status.
+     */
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Object> handleIllegalArgument(IllegalArgumentException ex) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamp", Instant.now());
+        body.put("error", ex.getMessage());
+        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+    }
 }

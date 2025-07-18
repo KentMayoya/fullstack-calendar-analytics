@@ -2,6 +2,9 @@ package app.calendaranalytics.api.services;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -10,12 +13,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.api.services.calendar.model.CalendarListEntry;
+import com.google.api.services.calendar.model.Event;
+import com.google.api.services.calendar.model.EventDateTime;
 
 import app.calendaranalytics.api.dtos.CalendarDto;
 import app.calendaranalytics.api.entities.Calendar;
 import app.calendaranalytics.api.entities.User;
 import app.calendaranalytics.api.exception.ResourceNotFoundException;
 import app.calendaranalytics.api.repositories.CalendarRepository;
+import app.calendaranalytics.api.repositories.EventRepository;
 import app.calendaranalytics.api.repositories.UserRepository;
 
 /**
@@ -31,6 +37,8 @@ public class CalendarService {
 
     private final GoogleCalendarService googleCalendarService;
 
+    private final EventRepository eventRepository;
+
     /**
      * Constructs the CalendarService with a dependency on the
      * CalendarRepository.
@@ -40,10 +48,12 @@ public class CalendarService {
      */
     public CalendarService(UserRepository userRepository,
             CalendarRepository calendarRepository,
-            GoogleCalendarService googleCalendarService) {
+            GoogleCalendarService googleCalendarService,
+            EventRepository eventRepository) {
         this.userRepository = userRepository;
         this.calendarRepository = calendarRepository;
         this.googleCalendarService = googleCalendarService;
+        this.eventRepository = eventRepository;
     }
 
     /**
@@ -135,5 +145,95 @@ public class CalendarService {
             calendarRepository.save(calendar);
         }
         return findCalendarsByUserId(userId);
+    }
+
+    /**
+     * Retrieves the Google calendar events related to a specified userId and
+     * calendarId since the last sync and stores it in the database.
+     *
+     * @param calendarId The calendar Id to retrieve events for.
+     * @param userId The user to search for a matching calendar.
+     * @throws ResourceNotFoundException If the calendarId is not valid, or does
+     * not belong to the userId, or if the refresh token is not found.
+     * @throws IOException If Google Auth library fails to refresh token.
+     * @throws IllegalArgumentException if at least one of the retrieved Events
+     * are malformed.
+     */
+    @Transactional
+    public void syncCalendarEvents(UUID userId, UUID calendarId) throws IOException {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                "User not found: " + userId));
+        String refreshToken = user.getGoogleRefreshToken();
+        if (refreshToken == null || refreshToken.isBlank()) {
+            throw new ResourceNotFoundException("User's refresh token not "
+                    + "found.");
+        }
+        Calendar calendar = calendarRepository.findByIdAndUserId(calendarId,
+                userId).orElseThrow(() -> new ResourceNotFoundException(
+                "Calendar not found with id: " + calendarId));
+        Instant lastSyncedAt = calendar.getLastSyncedAt();
+        List<com.google.api.services.calendar.model.Event> googleEvents
+                = googleCalendarService.getCalendarEventsSinceLastSync(
+                        refreshToken, calendar.getGoogleCalendarId(),
+                        lastSyncedAt);
+        System.out.println("Found " + googleEvents.size() + " events!");
+        List<app.calendaranalytics.api.entities.Event> eventsToSave
+                = new ArrayList<>();
+        for (Event googleEvent : googleEvents) {
+            app.calendaranalytics.api.entities.Event newEvent
+                    = initializeEvent(calendar, googleEvent);
+            eventsToSave.add(newEvent);
+        }
+        eventRepository.saveAll(eventsToSave);
+        calendar.setLastSyncedAt(Instant.now());
+        calendarRepository.save(calendar);
+    }
+
+    /**
+     * Initializes an Event entity.
+     *
+     * @param calendar The Calendar entity related to the Event.
+     * @param googleEvent A Google Calendar Event used to initialize an Event.
+     * @return An initialized Event.
+     */
+    private app.calendaranalytics.api.entities.Event initializeEvent(
+            Calendar calendar, Event googleEvent) {
+        app.calendaranalytics.api.entities.Event newEvent
+                = new app.calendaranalytics.api.entities.Event();
+        newEvent.setId(UUID.randomUUID());
+        newEvent.setCalendar(calendar);
+        newEvent.setGoogleEventId(googleEvent.getId());
+        newEvent.setTitle(googleEvent.getSummary());
+        newEvent.setDescription(googleEvent.getDescription());
+        Instant startTime = parseGoogleDateTime(googleEvent.getStart());
+        Instant endTime = parseGoogleDateTime(googleEvent.getEnd());
+        newEvent.setStartTime(startTime);
+        newEvent.setEndTime(endTime);
+        newEvent.setAllDay(googleEvent.getStart().getDateTime() == null);
+        return newEvent;
+    }
+
+    /**
+     * Parses Google's DateTime into an Instant object.
+     *
+     * @param eventDateTime A Google Calendar representation of an event's
+     * DateTime.
+     * @return eventDateTime converted to an Instant.
+     * @throws IllegalArgumentException if the input is null or malformed.
+     */
+    private Instant parseGoogleDateTime(EventDateTime eventDateTime) {
+        if (eventDateTime == null) {
+            return null;
+        }
+        if (eventDateTime.getDateTime() != null) {
+            return Instant.parse(eventDateTime.getDateTime().toStringRfc3339());
+        }
+        if (eventDateTime.getDate() != null) {
+            return LocalDate.parse(eventDateTime.getDate().toString())
+                    .atStartOfDay(ZoneOffset.UTC).toInstant();
+        }
+        throw new IllegalArgumentException("EventDateTime must contain either "
+                + "a dateTime or date property");
     }
 }

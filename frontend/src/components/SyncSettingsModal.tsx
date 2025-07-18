@@ -10,6 +10,7 @@ import {
 } from "@mui/material";
 import { useCalendar } from "../hooks/useCalendar";
 import { useNavigate } from "react-router-dom";
+import { useUser } from "../setup/app-context-manager/UserContext";
 
 type SyncSettingsModalProps = {
   isOpen: boolean;
@@ -36,6 +37,9 @@ const SyncSettingsModal = ({ isOpen, handleClose }: SyncSettingsModalProps) => {
   const { calendars, loading } = useCalendar();
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const navigate = useNavigate();
+  const { session } = useUser();
+
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   // This method is triggered every time a checkbox is clicked. If the triggering
   // calendarId is already in the set, remove it. Otherwise, add it.
@@ -51,9 +55,35 @@ const SyncSettingsModal = ({ isOpen, handleClose }: SyncSettingsModalProps) => {
     });
   };
 
-  const handleSyncEvents = () => {
+  // Fetches Google Calendar events from the selected calendar checkboxes
+  const handleSyncEvents = async () => {
+    if (!session?.access_token) {
+      console.log("no access token. returning");
+      return;
+    }
     const calendarIdsToSync = Array.from(selectedIds);
-    calendarIdsToSync.forEach((calendarId) => {});
+    for (const calendarId of calendarIdsToSync) {
+      console.log(`starting calendar sync for ${calendarId}`);
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/api/v1/calendars/${calendarId}/sync`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${session.access_token}`,
+            },
+          }
+        );
+        if (!response.ok) {
+          throw new Error(
+            `Sync failed for calendar ${calendarId} with status ${response.status}`
+          );
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    console.log("All selected syncs have been initiated.");
     handleClose();
   };
 

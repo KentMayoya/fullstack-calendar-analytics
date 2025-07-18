@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import app.calendaranalytics.api.dtos.CalendarDto;
@@ -62,7 +64,7 @@ public class CalendarController {
      * Updates the specified calendar's sync status.
      *
      * @param calendarId The specified calendar's UUID.
-     * @param updateDto
+     * @param updateDto The calendar columns to update.
      * @param authentication An object provided by the Spring Security
      * framework. Contains all the information regarding the currently logged-in
      * user.
@@ -95,6 +97,25 @@ public class CalendarController {
         UUID userId = UUID.fromString(authentication.getName());
         List<CalendarDto> updatedCalendars = calendarService.syncCalendars(userId);
         return ResponseEntity.ok(updatedCalendars);
+    }
+
+    /**
+     * Fetches and updates all Google Calendar Events for a specified Google
+     * Calendar since the calendar's last sync date and time.
+     *
+     * @param calendarId The specified calendar's UUID.
+     * @param authentication An object provided by the Spring Security
+     * framework. Contains all the information regarding the currently logged-in
+     * @throws IOException If Google Auth library fails to refresh token.
+     * @throws IllegalArgumentException if at least one of the retrieved Events
+     * are malformed.
+     */
+    @PostMapping("/{calendarId}/sync")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void syncCalendarEvents(@PathVariable UUID calendarId,
+            Authentication authentication) throws IOException {
+        UUID userId = UUID.fromString(authentication.getName());
+        calendarService.syncCalendarEvents(userId, calendarId);
     }
 
 }
