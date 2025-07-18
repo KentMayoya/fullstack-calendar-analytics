@@ -68,8 +68,9 @@ export const UserContextProvider = ({
             },
           });
           if (!response.ok) {
+            const responseBody = await response.text();
             throw new Error(
-              `Failed to fetch user profile. Body: ${response.text} Status: ${response.status}`
+              `Failed to fetch user profile. Body: ${responseBody} Status: ${response.status}`
             );
           }
           const profile = await response.json();
@@ -84,9 +85,6 @@ export const UserContextProvider = ({
                 refreshToken: supabaseSession.provider_token,
               }),
             });
-          } else {
-            // remove later
-            console.log("Refresh token already exists");
           }
           setSession({
             auth: supabaseSession.user,
