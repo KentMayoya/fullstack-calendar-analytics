@@ -1,10 +1,12 @@
 import { useState, useRef } from "react";
+import { Navigate } from "react-router-dom";
 import { Box, Toolbar } from "@mui/material";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import type { DatesSetArg } from "@fullcalendar/core";
 import CalendarToolbar from "../components/CalendarToolbar";
+import { useUser } from "../setup/app-context-manager/UserContext";
 
 const CalendarPage = () => {
   // Stores the title to display on the Calendar header
@@ -12,6 +14,13 @@ const CalendarPage = () => {
 
   // A ref to get direct access to the FullCalendar component's API
   const calendarRef = useRef<FullCalendar>(null);
+
+  const { session } = useUser();
+
+  // If the user does not have a valid session, redirect to the home page
+  if (!session?.auth) {
+    return <Navigate to="/" replace />;
+  }
 
   // Prompts FullCalendar to move the date back a period
   const handlePrevClick = () => {
