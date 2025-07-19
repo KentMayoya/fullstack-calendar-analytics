@@ -177,7 +177,6 @@ public class CalendarService {
                 = googleCalendarService.getCalendarEventsSinceLastSync(
                         refreshToken, calendar.getGoogleCalendarId(),
                         lastSyncedAt);
-        System.out.println("Found " + googleEvents.size() + " events!");
         List<app.calendaranalytics.api.entities.Event> eventsToSave
                 = new ArrayList<>();
         for (Event googleEvent : googleEvents) {
