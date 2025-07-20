@@ -1,6 +1,7 @@
 package app.calendaranalytics.api.services;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
@@ -209,6 +210,8 @@ public class CalendarService {
         Instant endTime = parseGoogleDateTime(googleEvent.getEnd());
         newEvent.setStartTime(startTime);
         newEvent.setEndTime(endTime);
+        long durationInMinutes = Duration.between(startTime, endTime).toMinutes();
+        newEvent.setDurationInMinutes((int)durationInMinutes);
         newEvent.setAllDay(googleEvent.getStart().getDateTime() == null);
         return newEvent;
     }
