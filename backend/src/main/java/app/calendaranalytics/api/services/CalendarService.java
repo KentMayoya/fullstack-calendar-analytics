@@ -178,9 +178,18 @@ public class CalendarService {
                 = googleCalendarService.getCalendarEventsSinceLastSync(
                         refreshToken, calendar.getGoogleCalendarId(),
                         lastSyncedAt);
+        List<String> cancelledEventIds = googleEvents.stream()
+                .filter(e -> e.getStatus().equals("cancelled"))
+                .map(com.google.api.services.calendar.model.Event::getId)
+                .collect(Collectors.toList());
+        deleteCancelledEvents(cancelledEventIds, calendar);
+        List<com.google.api.services.calendar.model.Event> eventsToUpsert
+                = googleEvents.stream()
+                        .filter(e -> !"cancelled".equals(e.getStatus()))
+                        .collect(Collectors.toList());
         List<app.calendaranalytics.api.entities.Event> eventsToSave
                 = new ArrayList<>();
-        for (Event googleEvent : googleEvents) {
+        for (Event googleEvent : eventsToUpsert) {
             app.calendaranalytics.api.entities.Event newEvent
                     = initializeEvent(calendar, googleEvent);
             eventsToSave.add(newEvent);
@@ -188,6 +197,23 @@ public class CalendarService {
         eventRepository.saveAll(eventsToSave);
         calendar.setLastSyncedAt(Instant.now());
         calendarRepository.save(calendar);
+    }
+
+    /**
+     * Deletes Events given their ids and the Calendar they belong to.
+     *
+     * @param cancelledEventIds A list of Event ids to delete.
+     * @param calendar The Calendar the events belong to.
+     */
+    private void deleteCancelledEvents(List<String> cancelledEventIds,
+            Calendar calendar) {
+        if (!cancelledEventIds.isEmpty()) {
+            List<app.calendaranalytics.api.entities.Event> eventsToDelete
+                    = eventRepository
+                            .findAllByGoogleEventIdInAndCalendar(cancelledEventIds,
+                                    calendar);
+            eventRepository.deleteAll(eventsToDelete);
+        }
     }
 
     /**
@@ -211,7 +237,7 @@ public class CalendarService {
         newEvent.setStartTime(startTime);
         newEvent.setEndTime(endTime);
         long durationInMinutes = Duration.between(startTime, endTime).toMinutes();
-        newEvent.setDurationInMinutes((int)durationInMinutes);
+        newEvent.setDurationInMinutes((int) durationInMinutes);
         newEvent.setAllDay(googleEvent.getStart().getDateTime() == null);
         return newEvent;
     }
