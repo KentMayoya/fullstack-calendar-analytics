@@ -1,3 +1,4 @@
+import { useState } from "react";
 import ReusableModal from "./ReusableModal";
 import {
   Typography,
@@ -9,15 +10,33 @@ import {
   Box,
   Button,
 } from "@mui/material";
-import { useCalendar } from "../setup/app-context-manager/CalendarContext";
+import {
+  useCalendar,
+  toggleIdInSet,
+} from "../setup/app-context-manager/CalendarContext";
 
 type DisplaySettingsModalProps = {
   handleClose: () => void;
 };
 
 const DisplaySettingsModal = ({ handleClose }: DisplaySettingsModalProps) => {
-  const { calendars, loading, selectedIds, handleSelectedIdsChange } =
-    useCalendar();
+  const {
+    calendars,
+    loading,
+    selectedIds: savedSelectedIds,
+    saveSelectedIds,
+  } = useCalendar();
+
+  // As the user is able to save or cancel their changes, this modal will have
+  // a local copy
+  const [draftSelectedIds, setDraftSelectedIds] = useState(savedSelectedIds);
+
+  // Saves the selectedIds managed by CalendarContext using the selected Ids
+  // in draftSelectedIds
+  const handleSave = () => {
+    saveSelectedIds(draftSelectedIds);
+    handleClose();
+  };
 
   return (
     <ReusableModal isOpen={true} handleClose={handleClose}>
@@ -71,8 +90,12 @@ const DisplaySettingsModal = ({ handleClose }: DisplaySettingsModalProps) => {
                     key={calendar.id}
                     control={
                       <Checkbox
-                        checked={selectedIds.has(calendar.id)}
-                        onChange={() => handleSelectedIdsChange(calendar.id)}
+                        checked={draftSelectedIds.has(calendar.id)}
+                        onChange={() =>
+                          setDraftSelectedIds((prev) =>
+                            toggleIdInSet(prev, calendar.id)
+                          )
+                        }
                       />
                     }
                     label={calendar.name}
@@ -91,7 +114,7 @@ const DisplaySettingsModal = ({ handleClose }: DisplaySettingsModalProps) => {
               Cancel
             </Button>
             {calendars.length > 0 ? (
-              <Button variant="contained" color="primary">
+              <Button variant="contained" color="primary" onClick={handleSave}>
                 Save
               </Button>
             ) : (

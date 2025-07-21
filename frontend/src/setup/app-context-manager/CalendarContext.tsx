@@ -14,6 +14,20 @@ interface Calendar {
   isSynced: boolean;
 }
 
+// Adds or deletes a calendar id to the Set and returns it.
+export const toggleIdInSet = (
+  prevSet: Set<string>,
+  id: string
+): Set<string> => {
+  const newSet = new Set(prevSet);
+  if (newSet.has(id)) {
+    newSet.delete(id);
+  } else {
+    newSet.add(id);
+  }
+  return newSet;
+};
+
 // Defines the data/functions that this context provides to other components
 interface CalendarContextType {
   calendars: Calendar[];
@@ -21,6 +35,7 @@ interface CalendarContextType {
   error: string;
   fetchCalendars: () => void;
   selectedIds: Set<string>;
+  saveSelectedIds: (newIds: Set<string>) => void;
   handleSelectedIdsChange: (calendarId: string) => void;
   handleToggleSync: (
     calendarId: string,
@@ -39,7 +54,16 @@ export const CalendarContextProvider = ({
   const [calendars, setCalendars] = useState<Calendar[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  // Key used to store selectedCalendarIds in localStorage
+  const SELECTED_CALENDARS_ID_KEY = "selectedCalendarIds";
+
+  // Initializes selected calendar ids from localStorage, or uses an empty
+  // set if none are saved
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(() => {
+    const saved = localStorage.getItem(SELECTED_CALENDARS_ID_KEY);
+    return saved ? new Set(JSON.parse(saved)) : new Set();
+  });
 
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -74,22 +98,15 @@ export const CalendarContextProvider = ({
     fetchCalendars();
   }, [fetchCalendars]);
 
-  // To be called when a calendar's selection changes
+  // To be called when a calendar's selection changes.
+  // Syncs the ids in selectedIds.
   const handleSelectedIdsChange = (calendarId: string) => {
-    setSelectedIds((prevSelectedIds) => {
-      const newSelectedIds = new Set(prevSelectedIds);
-      if (newSelectedIds.has(calendarId)) {
-        newSelectedIds.delete(calendarId);
-      } else {
-        newSelectedIds.add(calendarId);
-      }
-      return newSelectedIds;
-    });
+    setSelectedIds((prev) => toggleIdInSet(prev, calendarId));
   };
 
   // Load initial selection from localStorage
   useEffect(() => {
-    const savedCalendarIds = localStorage.getItem("selectedCalendarIds");
+    const savedCalendarIds = localStorage.getItem(SELECTED_CALENDARS_ID_KEY);
     if (savedCalendarIds) {
       setSelectedIds(new Set(JSON.parse(savedCalendarIds)));
     }
@@ -140,6 +157,16 @@ export const CalendarContextProvider = ({
     }
   };
 
+  // Sets selectedIds to the passed set and stores the calendar ids in
+  // local storage.
+  const saveSelectedIds = (newIds: Set<string>) => {
+    setSelectedIds(newIds);
+    localStorage.setItem(
+      SELECTED_CALENDARS_ID_KEY,
+      JSON.stringify(Array.from(newIds))
+    );
+  };
+
   // Bundles all the information to share, since the Provider component can
   // only accept a single value
   const value = {
@@ -148,6 +175,7 @@ export const CalendarContextProvider = ({
     error,
     fetchCalendars,
     selectedIds,
+    saveSelectedIds,
     handleSelectedIdsChange,
     handleToggleSync,
   };
