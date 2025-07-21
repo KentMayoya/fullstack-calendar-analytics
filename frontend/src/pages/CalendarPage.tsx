@@ -8,6 +8,7 @@ import interactionPlugin from "@fullcalendar/interaction";
 import type { EventInput, DatesSetArg } from "@fullcalendar/core";
 import CalendarToolbar from "../components/CalendarToolbar";
 import { useUser } from "../setup/app-context-manager/UserContext";
+import { useCalendar } from "../setup/app-context-manager/CalendarContext";
 
 const CalendarPage = () => {
   // Stores the title to display on the Calendar header
@@ -22,18 +23,20 @@ const CalendarPage = () => {
   // Stores the events to be displayed on the calendar
   const [events, setEvents] = useState<EventInput[]>([]);
 
+  const { selectedIds } = useCalendar();
+
   const { session } = useUser();
 
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   useEffect(() => {
-    if (!viewInfo || !session?.access_token) {
+    if (!viewInfo || !session?.access_token || selectedIds.size === 0) {
+      setEvents([]);
       return;
     }
     console.log("Attempting to fetch events!");
     const fetchEvents = async () => {
-      // Temporarily hard coded for testing. To be changed later.
-      const calendarIds = "00f9c832-4901-4fb7-84e6-a5402c7b784d";
+      const calendarIds = Array.from(selectedIds).join(",");
       try {
         const start = viewInfo.start.toISOString();
         const end = viewInfo.end.toISOString();
@@ -61,7 +64,6 @@ const CalendarPage = () => {
         );
         setEvents(formattedEvents);
         console.log("Formatted:", formattedEvents);
-        calendarRef.current?.getApi().refetchEvents();
       } catch (error) {
         console.error("Error fetching events: ", error);
       }
@@ -121,7 +123,7 @@ const CalendarPage = () => {
           headerToolbar={false}
           datesSet={handleDatesSet}
           height="100%"
-          eventSources={[events]}
+          events={events}
         />
       </Box>
     </Box>
