@@ -9,30 +9,15 @@ import {
   Box,
   Button,
 } from "@mui/material";
-import { useState } from "react";
-import { useCalendar } from "../hooks/useCalendar";
+import { useCalendar } from "../setup/app-context-manager/CalendarContext";
 
 type DisplaySettingsModalProps = {
   handleClose: () => void;
 };
 
 const DisplaySettingsModal = ({ handleClose }: DisplaySettingsModalProps) => {
-  const { calendars, loading } = useCalendar();
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-
-  // This method is triggered every time a checkbox is clicked. If the triggering
-  // calendarId is already in the set, remove it. Otherwise, add it.
-  const handleSelectionChange = (calendarId: string) => {
-    setSelectedIds((prevSelectedIds) => {
-      const newSelectedIds = new Set(prevSelectedIds);
-      if (newSelectedIds.has(calendarId)) {
-        newSelectedIds.delete(calendarId);
-      } else {
-        newSelectedIds.add(calendarId);
-      }
-      return newSelectedIds;
-    });
-  };
+  const { calendars, loading, selectedIds, handleSelectedIdsChange } =
+    useCalendar();
 
   return (
     <ReusableModal isOpen={true} handleClose={handleClose}>
@@ -87,7 +72,7 @@ const DisplaySettingsModal = ({ handleClose }: DisplaySettingsModalProps) => {
                     control={
                       <Checkbox
                         checked={selectedIds.has(calendar.id)}
-                        onChange={() => handleSelectionChange(calendar.id)}
+                        onChange={() => handleSelectedIdsChange(calendar.id)}
                       />
                     }
                     label={calendar.name}

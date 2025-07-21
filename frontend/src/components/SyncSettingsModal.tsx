@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   Box,
   Typography,
@@ -7,7 +6,7 @@ import {
   Button,
   CircularProgress,
 } from "@mui/material";
-import { useCalendar } from "../hooks/useCalendar";
+import { useCalendar } from "../setup/app-context-manager/CalendarContext";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../setup/app-context-manager/UserContext";
 import ReusableModal from "./ReusableModal";
@@ -17,26 +16,12 @@ type SyncSettingsModalProps = {
 };
 
 const SyncSettingsModal = ({ handleClose }: SyncSettingsModalProps) => {
-  const { calendars, loading } = useCalendar();
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const { calendars, loading, selectedIds, handleSelectedIdsChange } =
+    useCalendar();
   const navigate = useNavigate();
   const { session } = useUser();
 
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
-  // This method is triggered every time a checkbox is clicked. If the triggering
-  // calendarId is already in the set, remove it. Otherwise, add it.
-  const handleSelectionChange = (calendarId: string) => {
-    setSelectedIds((prevSelectedIds) => {
-      const newSelectedIds = new Set(prevSelectedIds);
-      if (newSelectedIds.has(calendarId)) {
-        newSelectedIds.delete(calendarId);
-      } else {
-        newSelectedIds.add(calendarId);
-      }
-      return newSelectedIds;
-    });
-  };
 
   // Fetches Google Calendar events from the selected calendar checkboxes
   const handleSyncEvents = async () => {
@@ -90,7 +75,6 @@ const SyncSettingsModal = ({ handleClose }: SyncSettingsModalProps) => {
           >
             My Calendars
           </Typography>
-
           <Box
             sx={{
               flexGrow: 1,
@@ -114,7 +98,7 @@ const SyncSettingsModal = ({ handleClose }: SyncSettingsModalProps) => {
                     control={
                       <Checkbox
                         checked={selectedIds.has(calendar.id)}
-                        onChange={() => handleSelectionChange(calendar.id)}
+                        onChange={() => handleSelectedIdsChange(calendar.id)}
                       />
                     }
                     label={calendar.name}
