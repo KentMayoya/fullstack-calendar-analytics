@@ -1,6 +1,5 @@
 import { useState } from "react";
 import {
-  Modal,
   Box,
   Typography,
   FormControlLabel,
@@ -11,29 +10,13 @@ import {
 import { useCalendar } from "../hooks/useCalendar";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../setup/app-context-manager/UserContext";
+import ReusableModal from "./ReusableModal";
 
 type SyncSettingsModalProps = {
-  isOpen: boolean;
   handleClose: () => void;
 };
 
-const style = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: {
-    xs: "60%",
-    lg: "30%",
-  },
-  minHeight: 100,
-  bgcolor: "background.paper",
-  border: "2px solid #000",
-  boxShadow: 24,
-  p: 4,
-};
-
-const SyncSettingsModal = ({ isOpen, handleClose }: SyncSettingsModalProps) => {
+const SyncSettingsModal = ({ handleClose }: SyncSettingsModalProps) => {
   const { calendars, loading } = useCalendar();
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const navigate = useNavigate();
@@ -87,92 +70,89 @@ const SyncSettingsModal = ({ isOpen, handleClose }: SyncSettingsModalProps) => {
     handleClose();
   };
 
+  // Closes the Modal and redirects the user to /settings
   const handleGoToSettings = () => {
     handleClose();
     navigate("/settings");
   };
 
   return (
-    <Modal open={isOpen} onClose={handleClose}>
-      <Box sx={style}>
-        {!loading && (
-          <Box
-            sx={{ display: "flex", flexDirection: "column", height: "100%" }}
+    <ReusableModal isOpen={true} handleClose={handleClose}>
+      {!loading && (
+        <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
+          <Typography
+            component="h2"
+            variant="h6"
+            sx={{
+              fontWeight: "bold",
+              mb: 2,
+            }}
           >
-            <Typography
-              component="h2"
-              variant="h6"
-              sx={{
-                fontWeight: "bold",
-                mb: 2,
-              }}
-            >
-              My Calendars
-            </Typography>
+            My Calendars
+          </Typography>
 
-            <Box
-              sx={{
-                flexGrow: 1,
-                overflowY: "auto",
-                maxHeight: 200,
-              }}
-            >
-              {loading && <CircularProgress />}
-              {!loading &&
-                (calendars.length === 0 ? (
-                  <Typography
-                    sx={{ color: "text.secondary", textAlign: "center" }}
-                  >
-                    No calendars found.
-                  </Typography>
-                ) : (
-                  // If not empty, map over the array as before
-                  calendars.map((calendar) => (
-                    <FormControlLabel
-                      key={calendar.id}
-                      control={
-                        <Checkbox
-                          checked={selectedIds.has(calendar.id)}
-                          onChange={() => handleSelectionChange(calendar.id)}
-                        />
-                      }
-                      label={calendar.name}
-                    />
-                  ))
-                ))}
-            </Box>
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                mt: 2,
-              }}
-            >
-              <Button variant="contained" color="primary" onClick={handleClose}>
-                Cancel
-              </Button>
-              {calendars.length > 0 ? (
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={handleSyncEvents}
+          <Box
+            sx={{
+              flexGrow: 1,
+              overflowY: "auto",
+              maxHeight: 200,
+            }}
+          >
+            {loading && <CircularProgress />}
+            {!loading &&
+              (calendars.length === 0 ? (
+                <Typography
+                  sx={{ color: "text.secondary", textAlign: "center" }}
                 >
-                  Sync Events
-                </Button>
+                  No calendars found.
+                </Typography>
               ) : (
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={handleGoToSettings}
-                >
-                  Settings
-                </Button>
-              )}
-            </Box>
+                // If not empty, map over the array as before
+                calendars.map((calendar) => (
+                  <FormControlLabel
+                    key={calendar.id}
+                    control={
+                      <Checkbox
+                        checked={selectedIds.has(calendar.id)}
+                        onChange={() => handleSelectionChange(calendar.id)}
+                      />
+                    }
+                    label={calendar.name}
+                  />
+                ))
+              ))}
           </Box>
-        )}
-      </Box>
-    </Modal>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              mt: 2,
+            }}
+          >
+            <Button variant="contained" color="primary" onClick={handleClose}>
+              Cancel
+            </Button>
+            {calendars.length > 0 ? (
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleSyncEvents}
+              >
+                Sync Events
+              </Button>
+            ) : (
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleGoToSettings}
+              >
+                Settings
+              </Button>
+            )}
+          </Box>
+        </Box>
+      )}
+    </ReusableModal>
   );
 };
 
