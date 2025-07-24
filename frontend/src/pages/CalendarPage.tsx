@@ -69,7 +69,7 @@ const CalendarPage = () => {
       }
     };
     fetchEvents();
-  }, [viewInfo, session?.access_token, API_BASE_URL]);
+  }, [viewInfo, session?.access_token, API_BASE_URL, selectedIds]);
 
   // If the user does not have a valid session, redirect to the home page
   if (!session?.auth) {

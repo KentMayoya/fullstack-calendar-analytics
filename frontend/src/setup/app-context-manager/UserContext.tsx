@@ -1,5 +1,3 @@
-// src/setup/app-context-manager/UserContext.tsx
-
 import { createContext, useState, useEffect, useContext } from "react";
 import { createClient } from "@supabase/supabase-js";
 import type { User, SupabaseClient } from "@supabase/supabase-js";
@@ -29,7 +27,11 @@ const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: {
+    persistSession: true,
+  },
+});
 
 // Make UserContext available to other files.
 export const UserContext = createContext<UserContextType | null>(null);

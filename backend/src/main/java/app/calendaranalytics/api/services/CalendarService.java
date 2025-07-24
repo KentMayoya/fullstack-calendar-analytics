@@ -208,9 +208,10 @@ public class CalendarService {
     }
 
     /**
+     * Creates or updates events and commits them to the database.
      *
      * @param eventsToUpsert A list of Google Calendar events to create or
-     * udpate.
+     * update.
      * @param calendarId The calendar Id to retrieve events for.
      */
     private void createOrUpdateEvents(

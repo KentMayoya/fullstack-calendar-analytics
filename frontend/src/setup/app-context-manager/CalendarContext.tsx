@@ -31,12 +31,11 @@ export const toggleIdInSet = (
 // Defines the data/functions that this context provides to other components
 interface CalendarContextType {
   calendars: Calendar[];
+  setCalendars: React.Dispatch<React.SetStateAction<Calendar[]>>;
   loading: boolean;
   error: string;
-  fetchCalendars: () => void;
   selectedIds: Set<string>;
   saveSelectedIds: (newIds: Set<string>) => void;
-  handleSelectedIdsChange: (calendarId: string) => void;
   handleToggleSync: (
     calendarId: string,
     currentStatus: boolean
@@ -97,12 +96,6 @@ export const CalendarContextProvider = ({
   useEffect(() => {
     fetchCalendars();
   }, [fetchCalendars]);
-
-  // To be called when a calendar's selection changes.
-  // Syncs the ids in selectedIds.
-  const handleSelectedIdsChange = (calendarId: string) => {
-    setSelectedIds((prev) => toggleIdInSet(prev, calendarId));
-  };
 
   // Load initial selection from localStorage
   useEffect(() => {
@@ -171,12 +164,11 @@ export const CalendarContextProvider = ({
   // only accept a single value
   const value = {
     calendars,
+    setCalendars,
     loading,
     error,
-    fetchCalendars,
     selectedIds,
     saveSelectedIds,
-    handleSelectedIdsChange,
     handleToggleSync,
   };
 
