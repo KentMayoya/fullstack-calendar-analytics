@@ -97,14 +97,6 @@ export const CalendarContextProvider = ({
     fetchCalendars();
   }, [fetchCalendars]);
 
-  // Load initial selection from localStorage
-  useEffect(() => {
-    const savedCalendarIds = localStorage.getItem(SELECTED_CALENDARS_ID_KEY);
-    if (savedCalendarIds) {
-      setSelectedIds(new Set(JSON.parse(savedCalendarIds)));
-    }
-  }, []);
-
   // Updates the database when a user toggles a switch for a specified calendar
   const handleToggleSync = async (
     calendarId: string,
