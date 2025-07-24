@@ -10,18 +10,24 @@ import {
 import { useUser } from "../setup/app-context-manager/UserContext";
 import { Navigate } from "react-router-dom";
 import { useState } from "react";
-import { useCalendar } from "../hooks/useCalendar";
+import { useCalendar } from "../setup/app-context-manager/CalendarContext";
 
 const SettingsPage = () => {
   const context = useUser();
   const { session } = context;
+
+  // Used when fetching calendars from Google Calendar
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
-  const { setCalendars, calendars, loading, fetchCalendars } = useCalendar();
+
+  // calendars: Contains a list of calendars from the database
+  // loading: Used when fetching calendars from the database
+  // handleToggleSync: Updates the database when a user toggles a switch for
+  // a specified calendar
+  const { setCalendars, calendars, loading, handleToggleSync } = useCalendar();
 
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-  // Fetches Google Calendars through the Google Calendar API and calls
-  // fetchCalendars to update the UI
+  // Fetches Google Calendars through the Google Calendar API
   const fetchGoogleCalendars = async () => {
     setIsSyncing(true);
     try {
@@ -34,57 +40,12 @@ const SettingsPage = () => {
       if (!response.ok) {
         throw new Error("Failed to fetch calendars");
       }
-      await fetchCalendars();
+      const updatedCalendars = await response.json();
+      setCalendars(updatedCalendars);
     } catch (error) {
       console.log(error);
-      // do something
     } finally {
       setIsSyncing(false);
-    }
-  };
-
-  // Updates the database when a user toggles a switch for a specified calendar
-  const handleToggleSync = async (
-    calendarId: string,
-    currentStatus: boolean
-  ) => {
-    if (!session?.access_token) {
-      return;
-    }
-    // Traverse through the list of calendars. Switch the sync status of the
-    // calendar that is toggled. This takes place before the API call.
-    setCalendars((currentCalendars) =>
-      currentCalendars.map((calendar) =>
-        calendar.id === calendarId
-          ? { ...calendar, isSynced: !currentStatus }
-          : calendar
-      )
-    );
-    try {
-      const response = await fetch(
-        `${API_BASE_URL}/api/v1/calendars/${calendarId}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${session.access_token}`,
-          },
-          body: JSON.stringify({ isSynced: !currentStatus }),
-        }
-      );
-      if (!response.ok) {
-        throw new Error(`API call failed with status: ${response.status}`);
-      }
-    } catch (err) {
-      console.log(err);
-      // Toggle failed, undo the optimistic UI toggle update.
-      setCalendars((currentCalendars) =>
-        currentCalendars.map((calendar) =>
-          calendar.id === calendarId
-            ? { ...calendar, isSynced: currentStatus }
-            : calendar
-        )
-      );
     }
   };
 

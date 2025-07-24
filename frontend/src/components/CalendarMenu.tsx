@@ -4,11 +4,13 @@ import ReusableMenu from "./ReusableMenu";
 import { useMenu } from "../hooks/useMenu";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import SyncSettingsModal from "./SyncSettingsModal";
+import DisplaySettingsModal from "./DisplaySettingsModal";
 
 const UserMenu = () => {
   const { anchorEl, open, handleOpen, handleClose } = useMenu();
 
   const [isSyncModalOpen, setIsSyncModalOpen] = useState<boolean>(false);
+  const [isDisplayModalOpen, setIsDisplayModalOpen] = useState<boolean>(false);
 
   const openSyncModal = () => {
     setIsSyncModalOpen(true);
@@ -18,18 +20,25 @@ const UserMenu = () => {
     setIsSyncModalOpen(false);
   };
 
+  const openDisplayModal = () => {
+    setIsDisplayModalOpen(true);
+  };
+
+  const closeDisplayModal = () => {
+    setIsDisplayModalOpen(false);
+  };
+
   const menuItems = [
     {
       label: "Display Settings",
       onClick: () => {
-        console.log("display settings clicked");
+        openDisplayModal();
         handleClose();
       },
     },
     {
       label: "Sync Settings",
       onClick: () => {
-        console.log("sync settings clicked");
         openSyncModal();
         handleClose();
       },
@@ -51,11 +60,9 @@ const UserMenu = () => {
         onClose={handleClose}
         menuItems={menuItems}
       />
-      {isSyncModalOpen && (
-        <SyncSettingsModal
-          isOpen={isSyncModalOpen}
-          handleClose={closeSyncModal}
-        />
+      {isSyncModalOpen && <SyncSettingsModal handleClose={closeSyncModal} />}
+      {isDisplayModalOpen && (
+        <DisplaySettingsModal handleClose={closeDisplayModal} />
       )}
     </>
   );

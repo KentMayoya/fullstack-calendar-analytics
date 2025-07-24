@@ -2,6 +2,8 @@ package app.calendaranalytics.api.services;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -13,6 +15,7 @@ import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.CalendarListEntry;
 import com.google.api.services.calendar.model.Event;
+import com.google.api.services.calendar.model.Events;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.UserCredentials;
 
@@ -78,11 +81,13 @@ public class GoogleCalendarService {
     }
 
     /**
-     * Returns a list of Events that have been modified since the last sync.
+     * Returns a list of Events that have been modified since the last sync. If
+     * this is the first time the calendar is being synced, only the events
+     * modified in the last year will be retrieved.
      *
      * @param refreshToken The Google refresh token used to generate an access
      * token.
-     * @param googleCalendarId
+     * @param googleCalendarId The Google Calendar id the events are related to.
      * @param lastSyncedAt The last time the calendar was synced. May be null if
      * the calendar has never been synced yet.
      * @return
@@ -91,11 +96,26 @@ public class GoogleCalendarService {
     public List<Event> getCalendarEventsSinceLastSync(String refreshToken,
             String googleCalendarId, Instant lastSyncedAt) throws IOException {
         Calendar client = buildCalendarClient(refreshToken);
-        Calendar.Events.List request = client.events().list(googleCalendarId)
-                .setShowDeleted(true);
-        if (lastSyncedAt != null) {
-            request.setUpdatedMin(new DateTime(lastSyncedAt.toEpochMilli()));
-        }
-        return request.execute().getItems();
+        List<Event> allEvents = new ArrayList<>();
+        String pageToken = null;
+        do {
+            Calendar.Events.List request = client.events().list(googleCalendarId)
+                    .setShowDeleted(true)
+                    .setMaxResults(2500)
+                    .setPageToken(pageToken);
+            if (lastSyncedAt != null) {
+                request.setUpdatedMin(new DateTime(lastSyncedAt.toEpochMilli()));
+            } else {
+                Instant oneYearAgo = Instant.now().minus(365, ChronoUnit.DAYS);
+                request.setTimeMin(new DateTime(oneYearAgo.toEpochMilli()));
+            }
+            Events eventsPage = request.execute();
+            List<Event> eventItems = eventsPage.getItems();
+            if (eventItems != null) {
+                allEvents.addAll(eventItems);
+            }
+            pageToken = eventsPage.getNextPageToken();
+        } while (pageToken != null);
+        return allEvents;
     }
 }

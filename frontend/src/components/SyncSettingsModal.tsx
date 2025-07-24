@@ -1,6 +1,5 @@
 import { useState } from "react";
 import {
-  Modal,
   Box,
   Typography,
   FormControlLabel,
@@ -8,52 +7,32 @@ import {
   Button,
   CircularProgress,
 } from "@mui/material";
-import { useCalendar } from "../hooks/useCalendar";
+import {
+  useCalendar,
+  toggleIdInSet,
+} from "../setup/app-context-manager/CalendarContext";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../setup/app-context-manager/UserContext";
+import ReusableModal from "./ReusableModal";
 
 type SyncSettingsModalProps = {
-  isOpen: boolean;
   handleClose: () => void;
 };
 
-const style = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: {
-    xs: "60%",
-    lg: "30%",
-  },
-  minHeight: 100,
-  bgcolor: "background.paper",
-  border: "2px solid #000",
-  boxShadow: 24,
-  p: 4,
-};
-
-const SyncSettingsModal = ({ isOpen, handleClose }: SyncSettingsModalProps) => {
-  const { calendars, loading } = useCalendar();
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const navigate = useNavigate();
+const SyncSettingsModal = ({ handleClose }: SyncSettingsModalProps) => {
   const { session } = useUser();
 
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+  // calendars contains a list of Calendars' id, name, and isSynced
+  // loading is true if the calendars are still being fetched. Otherwise, false
+  const { calendars, loading } = useCalendar();
 
-  // This method is triggered every time a checkbox is clicked. If the triggering
-  // calendarId is already in the set, remove it. Otherwise, add it.
-  const handleSelectionChange = (calendarId: string) => {
-    setSelectedIds((prevSelectedIds) => {
-      const newSelectedIds = new Set(prevSelectedIds);
-      if (newSelectedIds.has(calendarId)) {
-        newSelectedIds.delete(calendarId);
-      } else {
-        newSelectedIds.add(calendarId);
-      }
-      return newSelectedIds;
-    });
-  };
+  const navigate = useNavigate();
+
+  // A local copy of selectedIds that contain the ids of the calendars
+  // the user wishes to sync.
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   // Fetches Google Calendar events from the selected calendar checkboxes
   const handleSyncEvents = async () => {
@@ -87,92 +66,94 @@ const SyncSettingsModal = ({ isOpen, handleClose }: SyncSettingsModalProps) => {
     handleClose();
   };
 
+  // Function is triggered when a user checks or unchecks the calendar
+  // checkboxes. Syncs the ids in selectedIds.
+  const handleSelectionChange = (calendarId: string) => {
+    setSelectedIds((prev) => toggleIdInSet(prev, calendarId));
+  };
+
+  // Closes the Modal and redirects the user to /settings
   const handleGoToSettings = () => {
     handleClose();
     navigate("/settings");
   };
 
   return (
-    <Modal open={isOpen} onClose={handleClose}>
-      <Box sx={style}>
-        {!loading && (
-          <Box
-            sx={{ display: "flex", flexDirection: "column", height: "100%" }}
+    <ReusableModal isOpen={true} handleClose={handleClose}>
+      {!loading && (
+        <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
+          <Typography
+            component="h2"
+            variant="h6"
+            sx={{
+              fontWeight: "bold",
+              mb: 2,
+            }}
           >
-            <Typography
-              component="h2"
-              variant="h6"
-              sx={{
-                fontWeight: "bold",
-                mb: 2,
-              }}
-            >
-              My Calendars
-            </Typography>
-
-            <Box
-              sx={{
-                flexGrow: 1,
-                overflowY: "auto",
-                maxHeight: 200,
-              }}
-            >
-              {loading && <CircularProgress />}
-              {!loading &&
-                (calendars.length === 0 ? (
-                  <Typography
-                    sx={{ color: "text.secondary", textAlign: "center" }}
-                  >
-                    No calendars found.
-                  </Typography>
-                ) : (
-                  // If not empty, map over the array as before
-                  calendars.map((calendar) => (
-                    <FormControlLabel
-                      key={calendar.id}
-                      control={
-                        <Checkbox
-                          checked={selectedIds.has(calendar.id)}
-                          onChange={() => handleSelectionChange(calendar.id)}
-                        />
-                      }
-                      label={calendar.name}
-                    />
-                  ))
-                ))}
-            </Box>
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                mt: 2,
-              }}
-            >
-              <Button variant="contained" color="primary" onClick={handleClose}>
-                Cancel
-              </Button>
-              {calendars.length > 0 ? (
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={handleSyncEvents}
+            My Calendars
+          </Typography>
+          <Box
+            sx={{
+              flexGrow: 1,
+              overflowY: "auto",
+              maxHeight: 200,
+            }}
+          >
+            {loading && <CircularProgress />}
+            {!loading &&
+              (calendars.length === 0 ? (
+                <Typography
+                  sx={{ color: "text.secondary", textAlign: "center" }}
                 >
-                  Sync Events
-                </Button>
+                  No calendars found.
+                </Typography>
               ) : (
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={handleGoToSettings}
-                >
-                  Settings
-                </Button>
-              )}
-            </Box>
+                // If not empty, map over the array as before
+                calendars.map((calendar) => (
+                  <FormControlLabel
+                    key={calendar.id}
+                    control={
+                      <Checkbox
+                        checked={selectedIds.has(calendar.id)}
+                        onChange={() => handleSelectionChange(calendar.id)}
+                      />
+                    }
+                    label={calendar.name}
+                  />
+                ))
+              ))}
           </Box>
-        )}
-      </Box>
-    </Modal>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              mt: 2,
+            }}
+          >
+            <Button variant="contained" color="primary" onClick={handleClose}>
+              Cancel
+            </Button>
+            {calendars.length > 0 ? (
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleSyncEvents}
+              >
+                Sync Events
+              </Button>
+            ) : (
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleGoToSettings}
+              >
+                Settings
+              </Button>
+            )}
+          </Box>
+        </Box>
+      )}
+    </ReusableModal>
   );
 };
 

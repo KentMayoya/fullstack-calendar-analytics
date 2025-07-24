@@ -1,9 +1,14 @@
 package app.calendaranalytics.api.repositories;
 
+import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import app.calendaranalytics.api.entities.Calendar;
 import app.calendaranalytics.api.entities.Event;
 
 /**
@@ -16,4 +21,37 @@ import app.calendaranalytics.api.entities.Event;
  */
 public interface EventRepository extends JpaRepository<Event, UUID> {
 
+    /**
+     * Queries for all events that to a user, whose calendar Id is included in
+     * calendarIds, and whose events fall within the start and end range.
+     *
+     * @param userId The user the events belong to.
+     * @param calendarIds The list of calendarIds the events belong to.
+     * @param start The start date/time for the queried events.
+     * @param end The end date/time for the queried events.
+     * @return A list of Events that satisfy the user, calendar, and date range.
+     */
+    @Query("""
+        SELECT e
+        FROM Event e
+        WHERE e.calendar.user.id = :userId
+            AND e.calendar.id IN :calendarIds
+            AND e.startTime < :end
+            AND e.endTime > :start        
+    """)
+    public List<Event> findEventsForUserByCalendarIdsAndDateRange(
+            @Param("userId") UUID userId,
+            @Param("calendarIds") List<UUID> calendarIds,
+            @Param("start") Instant start,
+            @Param("end") Instant end);
+
+    /**
+     * Retrieves all Event entities that match the google event ids and
+     * calendar.
+     *
+     * @param googleEventId The google event ids to search for.
+     * @param calendar The Calendar the events belongs to.
+     */
+    public List<Event> findAllByGoogleEventIdInAndCalendar(List<String> googleEventIds,
+            Calendar calendar);
 }

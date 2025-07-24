@@ -23,7 +23,8 @@ import app.calendaranalytics.api.services.UserService;
 @RequestMapping("/api/v1/users")
 public class UserController {
 
-    // A Spring-managed Bean that provides data access methods for the User entity.
+    // A Spring-managed Bean that provides business logic methods for the User
+    // entity.
     private final UserService userService;
 
     /**

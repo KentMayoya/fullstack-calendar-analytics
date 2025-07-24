@@ -1,11 +1,13 @@
 package app.calendaranalytics.api.services;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -13,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.api.services.calendar.model.CalendarListEntry;
-import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
 
 import app.calendaranalytics.api.dtos.CalendarDto;
@@ -177,13 +178,66 @@ public class CalendarService {
                 = googleCalendarService.getCalendarEventsSinceLastSync(
                         refreshToken, calendar.getGoogleCalendarId(),
                         lastSyncedAt);
-        System.out.println("Found " + googleEvents.size() + " events!");
+        List<String> cancelledEventIds = googleEvents.stream()
+                .filter(e -> e.getStatus().equals("cancelled"))
+                .map(com.google.api.services.calendar.model.Event::getId)
+                .collect(Collectors.toList());
+        deleteCancelledEvents(cancelledEventIds, calendar);
+        List<com.google.api.services.calendar.model.Event> eventsToUpsert
+                = googleEvents.stream()
+                        .filter(e -> !"cancelled".equals(e.getStatus()))
+                        .collect(Collectors.toList());
+        createOrUpdateEvents(eventsToUpsert, calendar);
+    }
+
+    /**
+     * Deletes Events given their ids and the Calendar they belong to.
+     *
+     * @param cancelledEventIds A list of Event ids to delete.
+     * @param calendar The Calendar the events belong to.
+     */
+    private void deleteCancelledEvents(List<String> cancelledEventIds,
+            Calendar calendar) {
+        if (!cancelledEventIds.isEmpty()) {
+            List<app.calendaranalytics.api.entities.Event> eventsToDelete
+                    = eventRepository
+                            .findAllByGoogleEventIdInAndCalendar(cancelledEventIds,
+                                    calendar);
+            eventRepository.deleteAll(eventsToDelete);
+        }
+    }
+
+    /**
+     * Creates or updates events and commits them to the database.
+     *
+     * @param eventsToUpsert A list of Google Calendar events to create or
+     * update.
+     * @param calendarId The calendar Id to retrieve events for.
+     */
+    private void createOrUpdateEvents(
+            List<com.google.api.services.calendar.model.Event> eventsToUpsert,
+            Calendar calendar) {
         List<app.calendaranalytics.api.entities.Event> eventsToSave
                 = new ArrayList<>();
-        for (Event googleEvent : googleEvents) {
-            app.calendaranalytics.api.entities.Event newEvent
-                    = initializeEvent(calendar, googleEvent);
-            eventsToSave.add(newEvent);
+        List<String> eventIds = eventsToUpsert.stream()
+                .map(com.google.api.services.calendar.model.Event::getId)
+                .collect(Collectors.toList());
+        List<app.calendaranalytics.api.entities.Event> existingEvents
+                = eventRepository.findAllByGoogleEventIdInAndCalendar(
+                        eventIds, calendar);
+        Map<String, app.calendaranalytics.api.entities.Event> existingEventsMap
+                = existingEvents.stream()
+                        .collect(Collectors.toMap(
+                                app.calendaranalytics.api.entities.Event::getGoogleEventId,
+                                event -> event));
+        for (com.google.api.services.calendar.model.Event googleEvent
+                : eventsToUpsert) {
+            app.calendaranalytics.api.entities.Event event = existingEventsMap
+                    .getOrDefault(googleEvent.getId(),
+                            new app.calendaranalytics.api.entities.Event());
+            boolean isNewEvent = event.getId() == null;
+            mapGoogleEventToEntity(isNewEvent, calendar, googleEvent, event);
+            eventsToSave.add(event);
         }
         eventRepository.saveAll(eventsToSave);
         calendar.setLastSyncedAt(Instant.now());
@@ -191,27 +245,35 @@ public class CalendarService {
     }
 
     /**
-     * Initializes an Event entity.
+     * Initializes the Event entity passed as an argument. If isNewEvent is
+     * true, assigns a new id, calendar, and google event id. Otherwise, updates
+     * the existing Event without modifying those three fields.
      *
+     * @param isNewEvent If true, the eventEntity does not exist in the
+     * database. If false, the eventEntity exists in the database but needs to
+     * be updated.
      * @param calendar The Calendar entity related to the Event.
      * @param googleEvent A Google Calendar Event used to initialize an Event.
-     * @return An initialized Event.
+     * @param eventEntity
      */
-    private app.calendaranalytics.api.entities.Event initializeEvent(
-            Calendar calendar, Event googleEvent) {
-        app.calendaranalytics.api.entities.Event newEvent
-                = new app.calendaranalytics.api.entities.Event();
-        newEvent.setId(UUID.randomUUID());
-        newEvent.setCalendar(calendar);
-        newEvent.setGoogleEventId(googleEvent.getId());
-        newEvent.setTitle(googleEvent.getSummary());
-        newEvent.setDescription(googleEvent.getDescription());
+    private void mapGoogleEventToEntity(
+            boolean isNewEvent, Calendar calendar,
+            com.google.api.services.calendar.model.Event googleEvent,
+            app.calendaranalytics.api.entities.Event eventEntity) {
+        if (isNewEvent) {
+            eventEntity.setId(UUID.randomUUID());
+            eventEntity.setCalendar(calendar);
+            eventEntity.setGoogleEventId(googleEvent.getId());
+        }
+        eventEntity.setTitle(googleEvent.getSummary());
+        eventEntity.setDescription(googleEvent.getDescription());
         Instant startTime = parseGoogleDateTime(googleEvent.getStart());
         Instant endTime = parseGoogleDateTime(googleEvent.getEnd());
-        newEvent.setStartTime(startTime);
-        newEvent.setEndTime(endTime);
-        newEvent.setAllDay(googleEvent.getStart().getDateTime() == null);
-        return newEvent;
+        eventEntity.setStartTime(startTime);
+        eventEntity.setEndTime(endTime);
+        long durationInMinutes = Duration.between(startTime, endTime).toMinutes();
+        eventEntity.setDurationInMinutes((int) durationInMinutes);
+        eventEntity.setAllDay(googleEvent.getStart().getDateTime() == null);
     }
 
     /**
