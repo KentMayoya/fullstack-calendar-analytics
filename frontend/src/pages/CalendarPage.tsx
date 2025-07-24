@@ -50,7 +50,15 @@ const CalendarPage = () => {
         );
         const data = await response.json();
         // Map the data to the format FullCalendar expects
-        const formattedEvents = data.map((event: any) => ({
+        interface ApiEvent {
+          id: string;
+          title: string;
+          startTime: string;
+          endTime: string;
+          isAllDay: boolean;
+          color: string;
+        }
+        const formattedEvents = (data as ApiEvent[]).map((event) => ({
           id: event.id,
           title: event.title,
           start: event.startTime,
