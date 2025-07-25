@@ -6,15 +6,22 @@ import {
   Switch,
   Button,
   CircularProgress,
+  List,
+  ListItem,
+  ListItemText,
+  IconButton,
 } from "@mui/material";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { useUser } from "../setup/app-context-manager/UserContext";
 import { Navigate } from "react-router-dom";
 import { useState } from "react";
 import { useCalendar } from "../setup/app-context-manager/CalendarContext";
+import { useTags } from "../hooks/useTags";
 
 const SettingsPage = () => {
-  const context = useUser();
-  const { session } = context;
+  const { session } = useUser();
+  const { tags, isLoading: isLoadingTags, error: tagError } = useTags();
 
   // Used when fetching calendars from Google Calendar
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
@@ -105,26 +112,20 @@ const SettingsPage = () => {
         </Box>
       )}
       {!loading && !isSyncing && (
-        <Box>
+        <List>
           {calendars.map((calendar) => (
-            <Box
-              key={calendar.id}
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <Typography>{calendar.name}</Typography>
+            <ListItem key={calendar.id} sx={{ py: 0 }}>
+              <ListItemText primary={calendar.name} />
               <Switch
+                edge="end"
                 checked={calendar.isSynced ?? false}
                 onChange={() =>
                   handleToggleSync(calendar.id, calendar.isSynced)
                 }
-              ></Switch>
-            </Box>
+              />
+            </ListItem>
           ))}
-        </Box>
+        </List>
       )}
       <Button
         variant="contained"
@@ -143,6 +144,33 @@ const SettingsPage = () => {
       >
         Tag Management
       </Typography>
+      {isLoadingTags && <CircularProgress />}
+      {!isLoadingTags && (
+        <List>
+          {tags.map((tag) => (
+            <ListItem
+              key={tag.id}
+              sx={{ py: 0 }}
+              secondaryAction={
+                <>
+                  <IconButton edge="end" aria-label="edit">
+                    <EditIcon />
+                  </IconButton>
+                  <IconButton edge="end" aria-label="delete">
+                    <DeleteIcon />
+                  </IconButton>
+                </>
+              }
+            >
+              <ListItemText primary={tag.name} />
+            </ListItem>
+          ))}
+        </List>
+      )}
+
+      <Button variant="contained" color="primary">
+        Add New Tag
+      </Button>
       <Divider sx={{ my: 2 }} />
       <Typography
         component="h2"
