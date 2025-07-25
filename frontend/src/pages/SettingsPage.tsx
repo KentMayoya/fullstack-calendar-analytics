@@ -147,6 +147,30 @@ const SettingsPage = () => {
     }
   };
 
+  // Deletes the selected tag from the database.
+  const handleDeleteClick = async (id: string) => {
+    console.log("delete was clicked!");
+    if (!session?.access_token) {
+      return;
+    }
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/tags/${id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error);
+      }
+      fetchTags();
+    } catch (error: any) {
+      console.error(error);
+    }
+  };
+
   return (
     <Box sx={{ p: { xs: 1, lg: 3 } }}>
       <Typography
@@ -262,7 +286,11 @@ const SettingsPage = () => {
                     >
                       <EditIcon />
                     </IconButton>
-                    <IconButton edge="end" aria-label="delete">
+                    <IconButton
+                      edge="end"
+                      aria-label="delete"
+                      onClick={() => handleDeleteClick(tag.id)}
+                    >
                       <DeleteIcon />
                     </IconButton>
                   </>

@@ -112,6 +112,23 @@ public class TagService {
     }
 
     /**
+     * Deletes the tag with the specified id for a user from the database.
+     *
+     * @param userId The id of the user the tag belongs to.
+     * @param id The tag's id to delete.
+     */
+    @Transactional
+    public void deleteTag(UUID userId, UUID id) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not "
+                + "found: " + userId));
+        Tag tagToDelete = tagRepository.findByUserAndId(user, id)
+                .orElseThrow(() -> new ResourceNotFoundException("Tag "
+                + id + " not found for user " + userId));
+        tagRepository.delete(tagToDelete);
+    }
+
+    /**
      * Helper method that maps the private Tag Entity to the public TagDto.
      *
      * @param tagEntity The Tag entity to convert.
