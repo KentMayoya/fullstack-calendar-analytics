@@ -13,6 +13,8 @@ import {
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import CheckIcon from "@mui/icons-material/Check";
+import CloseIcon from "@mui/icons-material/Close";
 import { useUser } from "../setup/app-context-manager/UserContext";
 import { Navigate } from "react-router-dom";
 import { useState } from "react";
@@ -25,6 +27,9 @@ const SettingsPage = () => {
 
   // Used when fetching calendars from Google Calendar
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
+
+  const [isAddingTag, setIsAddingTag] = useState<boolean>(false);
+  const [newTagName, setNewTagName] = useState<string>("");
 
   // calendars: Contains a list of calendars from the database
   // loading: Used when fetching calendars from the database
@@ -165,10 +170,52 @@ const SettingsPage = () => {
               <ListItemText primary={tag.name} />
             </ListItem>
           ))}
+          {isAddingTag && (
+            <ListItem
+              secondaryAction={
+                <>
+                  <IconButton color="primary" edge="end" aria-label="save">
+                    <CheckIcon />
+                  </IconButton>
+                  <IconButton
+                    edge="end"
+                    aria-label="cancel"
+                    onClick={() => {
+                      setIsAddingTag(false);
+                      setNewTagName("");
+                    }}
+                  >
+                    <CloseIcon />
+                  </IconButton>
+                </>
+              }
+            >
+              <TextField
+                value={newTagName}
+                onChange={(e) => setNewTagName(e.target.value)}
+                label="New Tag Name"
+                variant="standard"
+                size="small"
+                autoFocus
+                slotProps={{
+                  input: {
+                    inputProps: {
+                      maxLength: 50,
+                    },
+                  },
+                }}
+                helperText={`${newTagName.length} / 50`}
+              ></TextField>
+            </ListItem>
+          )}
         </List>
       )}
-
-      <Button variant="contained" color="primary">
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={() => setIsAddingTag(true)}
+        disabled={isAddingTag}
+      >
         Add New Tag
       </Button>
       <Divider sx={{ my: 2 }} />
