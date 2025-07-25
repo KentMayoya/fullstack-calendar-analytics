@@ -23,13 +23,24 @@ import { useTags } from "../hooks/useTags";
 
 const SettingsPage = () => {
   const { session } = useUser();
-  const { tags, isLoading: isLoadingTags, error: tagError } = useTags();
+  const {
+    tags,
+    fetchTags,
+    isLoading: isLoadingTags,
+    error: tagError,
+  } = useTags();
 
   // Used when fetching calendars from Google Calendar
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
 
+  // Boolean flag to display textbox
   const [isAddingTag, setIsAddingTag] = useState<boolean>(false);
+
+  // Value used to send to endpoints
   const [newTagName, setNewTagName] = useState<string>("");
+
+  // The message that is displayed upon tag creation error
+  const [tagCreationError, setTagCreationError] = useState<string>("");
 
   // calendars: Contains a list of calendars from the database
   // loading: Used when fetching calendars from the database
@@ -65,6 +76,29 @@ const SettingsPage = () => {
   if (!session?.auth) {
     return <Navigate to="/" replace />;
   }
+
+  // Calls /api/v1/tags endpoint to create a tag
+  const handleCreateTag = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/tags`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ name: newTagName }),
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error);
+      }
+      fetchTags();
+      setNewTagName("");
+      setIsAddingTag(false);
+    } catch (err: any) {
+      setTagCreationError(err.message);
+    }
+  };
 
   return (
     <Box sx={{ p: { xs: 1, lg: 3 } }}>
@@ -174,7 +208,12 @@ const SettingsPage = () => {
             <ListItem
               secondaryAction={
                 <>
-                  <IconButton color="primary" edge="end" aria-label="save">
+                  <IconButton
+                    color="primary"
+                    edge="end"
+                    aria-label="save"
+                    onClick={handleCreateTag}
+                  >
                     <CheckIcon />
                   </IconButton>
                   <IconButton
@@ -183,6 +222,7 @@ const SettingsPage = () => {
                     onClick={() => {
                       setIsAddingTag(false);
                       setNewTagName("");
+                      setTagCreationError("");
                     }}
                   >
                     <CloseIcon />
@@ -192,7 +232,10 @@ const SettingsPage = () => {
             >
               <TextField
                 value={newTagName}
-                onChange={(e) => setNewTagName(e.target.value)}
+                onChange={(e) => {
+                  setNewTagName(e.target.value);
+                  setTagCreationError("");
+                }}
                 label="New Tag Name"
                 variant="standard"
                 size="small"
@@ -204,7 +247,8 @@ const SettingsPage = () => {
                     },
                   },
                 }}
-                helperText={`${newTagName.length} / 50`}
+                error={!!tagCreationError}
+                helperText={tagCreationError || `${newTagName.length} / 50`}
               ></TextField>
             </ListItem>
           )}
