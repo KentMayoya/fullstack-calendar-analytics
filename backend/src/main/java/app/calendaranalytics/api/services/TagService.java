@@ -27,10 +27,11 @@ public class TagService {
     private final UserRepository userRepository;
 
     /**
-     * Constructs the TagService with a dependency on the TagRepository.
+     * Constructs the TagService with a dependency on the tag and user
+     * repositories.
      *
-     * @param calendarRepository The repository responsible for Calendar data
-     * access.
+     * @param tagRepository The repository responsible for tag data access.
+     * @param userRepository The repository responsible for user data access.
      */
     public TagService(TagRepository tagRepository, UserRepository userRepository) {
         this.tagRepository = tagRepository;
@@ -67,18 +68,6 @@ public class TagService {
     }
 
     /**
-     * Helper method that maps the private Tag Entity to the public TagDto.
-     *
-     * @param tagEntity The Tag entity to convert.
-     */
-    private TagDto mapToDto(Tag tagEntity) {
-        TagDto dto = new TagDto();
-        dto.setId(tagEntity.getId());
-        dto.setName(tagEntity.getName());
-        return dto;
-    }
-
-    /**
      * Retrieves a list of TagDtos related to the specified user.
      *
      * @param userId The userId to search for related tags.
@@ -93,5 +82,60 @@ public class TagService {
         return tags.stream()
                 .map(this::mapToDto)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Updates an existing tag's name in the database.
+     *
+     * @param userId The id of the user the tag belongs to.
+     * @param id The tag's id to update.
+     * @param name The tag's new name.
+     * @return A TagDto of the updated Tag.
+     * @throws DuplicateResourceException If a duplicate tag exists.
+     */
+    @Transactional
+    public TagDto updateTagName(UUID userId, UUID id, String name) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not "
+                + "found: " + userId));
+        Tag tagToUpdate = tagRepository.findByUserAndId(user, id)
+                .orElseThrow(() -> new ResourceNotFoundException("Tag "
+                + id + " not found for user " + userId));
+        if (name.equals(tagToUpdate.getName())) {
+            // No change to make. Return early.
+            return mapToDto(tagToUpdate);
+        }
+        throwExceptionIfDuplicateExists(user, name);
+        tagToUpdate.setName(name);
+        tagRepository.save(tagToUpdate);
+        return mapToDto(tagToUpdate);
+    }
+
+    /**
+     * Helper method that maps the private Tag Entity to the public TagDto.
+     *
+     * @param tagEntity The Tag entity to convert.
+     */
+    private TagDto mapToDto(Tag tagEntity) {
+        TagDto dto = new TagDto();
+        dto.setId(tagEntity.getId());
+        dto.setName(tagEntity.getName());
+        return dto;
+    }
+
+    /**
+     * Checks if a tag for a specific user with a specific name exists in the
+     * database. If so, throws a DuplicateResourceException.
+     *
+     * @param user The user the tag belongs to.
+     * @param name The name of the tag.
+     * @throws DuplicateResourceException If a duplicate tag exists.
+     */
+    private void throwExceptionIfDuplicateExists(User user, String name) {
+        Optional<Tag> existingTag = tagRepository.findByUserAndName(user, name);
+        if (existingTag.isPresent()) {
+            throw new DuplicateResourceException("Tag with name '" + name
+                    + "' already exists.");
+        }
     }
 }
