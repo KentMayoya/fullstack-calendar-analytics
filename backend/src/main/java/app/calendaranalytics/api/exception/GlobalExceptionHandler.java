@@ -41,4 +41,19 @@ public class GlobalExceptionHandler {
         body.put("error", ex.getMessage());
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
+
+    /**
+     * Handler for DuplicateResourceException. The response is a JSON object
+     * containing a timestamp and error message.
+     *
+     * @param ex The exception that was thrown.
+     * @return ResponseEntity containing a JSON error body and 409 status.
+     */
+    @ExceptionHandler(DuplicateResourceException.class)
+    public ResponseEntity<Object> handleDuplicateResource(DuplicateResourceException ex) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamp", Instant.now());
+        body.put("error", ex.getMessage());
+        return new ResponseEntity<>(body, HttpStatus.CONFLICT);
+    }
 }

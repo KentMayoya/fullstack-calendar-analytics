@@ -9,6 +9,8 @@ import type { EventInput, DatesSetArg } from "@fullcalendar/core";
 import CalendarToolbar from "../components/CalendarToolbar";
 import { useUser } from "../setup/app-context-manager/UserContext";
 import { useCalendar } from "../setup/app-context-manager/CalendarContext";
+import type { EventClickArg } from "@fullcalendar/core";
+import ApplyTagsModal from "../components/ApplyTagsModal";
 
 const CalendarPage = () => {
   // Stores the title to display on the Calendar header
@@ -22,6 +24,12 @@ const CalendarPage = () => {
 
   // Stores the events to be displayed on the calendar
   const [events, setEvents] = useState<EventInput[]>([]);
+
+  // Stores the event the user selected
+  const [selectedEvent, setSelectedEvent] = useState<EventInput | null>(null);
+
+  const [isApplyTagsModalOpen, setIsApplyTagsModalOpen] =
+    useState<boolean>(false);
 
   const { selectedIds } = useCalendar();
 
@@ -106,6 +114,23 @@ const CalendarPage = () => {
     setViewInfo(dateInfo);
   };
 
+  // Triggered whenever the user clicks on a FullCalendar event
+  const handleEventClick = (clickInfo: EventClickArg) => {
+    // Transform the data to a compatible type to store in selectedEvent
+    const eventData: EventInput = {
+      id: clickInfo.event.id,
+      title: clickInfo.event.title,
+      start: clickInfo.event.start ?? undefined,
+      end: clickInfo.event.end ?? undefined,
+      allDay: clickInfo.event.allDay,
+      backgroundColor: clickInfo.event.backgroundColor,
+      borderColor: clickInfo.event.borderColor,
+    };
+    setSelectedEvent(eventData);
+    setIsApplyTagsModalOpen(true);
+    console.log("This event was clicked! - " + selectedEvent?.title);
+  };
+
   return (
     <Box
       sx={(theme) => ({
@@ -132,7 +157,15 @@ const CalendarPage = () => {
           datesSet={handleDatesSet}
           height="100%"
           events={events}
+          eventClick={handleEventClick}
         />
+      </Box>
+      <Box>
+        {isApplyTagsModalOpen && (
+          <ApplyTagsModal
+            handleClose={() => setIsApplyTagsModalOpen(false)}
+          ></ApplyTagsModal>
+        )}
       </Box>
     </Box>
   );
