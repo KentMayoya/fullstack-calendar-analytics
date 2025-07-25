@@ -10,6 +10,7 @@ import CalendarToolbar from "../components/CalendarToolbar";
 import { useUser } from "../setup/app-context-manager/UserContext";
 import { useCalendar } from "../setup/app-context-manager/CalendarContext";
 import type { EventClickArg } from "@fullcalendar/core";
+import ApplyTagsModal from "../components/ApplyTagsModal";
 
 const CalendarPage = () => {
   // Stores the title to display on the Calendar header
@@ -26,6 +27,9 @@ const CalendarPage = () => {
 
   // Stores the event the user selected
   const [selectedEvent, setSelectedEvent] = useState<EventInput | null>(null);
+
+  const [isApplyTagsModalOpen, setIsApplyTagsModalOpen] =
+    useState<boolean>(false);
 
   const { selectedIds } = useCalendar();
 
@@ -123,7 +127,8 @@ const CalendarPage = () => {
       borderColor: clickInfo.event.borderColor,
     };
     setSelectedEvent(eventData);
-    console.log("This event was clicked! - " + eventData.title);
+    setIsApplyTagsModalOpen(true);
+    console.log("This event was clicked! - " + selectedEvent?.title);
   };
 
   return (
@@ -154,6 +159,13 @@ const CalendarPage = () => {
           events={events}
           eventClick={handleEventClick}
         />
+      </Box>
+      <Box>
+        {isApplyTagsModalOpen && (
+          <ApplyTagsModal
+            handleClose={() => setIsApplyTagsModalOpen(false)}
+          ></ApplyTagsModal>
+        )}
       </Box>
     </Box>
   );
