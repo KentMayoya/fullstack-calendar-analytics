@@ -32,6 +32,7 @@ import app.calendaranalytics.api.repositories.UserRepository;
 public class CalendarService {
 
     private final UserRepository userRepository;
+
     // A Spring-managed Bean that provides data access methods for the Calendar
     // entity.
     private final CalendarRepository calendarRepository;
@@ -41,11 +42,14 @@ public class CalendarService {
     private final EventRepository eventRepository;
 
     /**
-     * Constructs the CalendarService with a dependency on the
-     * CalendarRepository.
+     * Constructs the CalendarService with its dependencies.
      *
+     * @param userRepository The repository responsible for user data access.
      * @param calendarRepository The repository responsible for Calendar data
      * access.
+     * @param googleCalendarService Contains business logic related to the
+     * Google Calendar API.
+     * @param eventRepository The repository responsible for Event data access.
      */
     public CalendarService(UserRepository userRepository,
             CalendarRepository calendarRepository,
