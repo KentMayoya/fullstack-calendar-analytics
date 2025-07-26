@@ -6,10 +6,18 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import app.calendaranalytics.api.dtos.EventDto;
 import app.calendaranalytics.api.entities.Event;
+import app.calendaranalytics.api.entities.EventTag;
+import app.calendaranalytics.api.entities.Tag;
+import app.calendaranalytics.api.entities.User;
+import app.calendaranalytics.api.exception.ResourceNotFoundException;
 import app.calendaranalytics.api.repositories.EventRepository;
+import app.calendaranalytics.api.repositories.EventTagRepository;
+import app.calendaranalytics.api.repositories.TagRepository;
+import app.calendaranalytics.api.repositories.UserRepository;
 
 /**
  * A Service class that handles business logic for the Event entity.
@@ -17,16 +25,28 @@ import app.calendaranalytics.api.repositories.EventRepository;
 @Service
 public class EventService {
 
-    // A Spring-managed Bean that provides data access methods for the User entity.
     private final EventRepository eventRepository;
+    private final UserRepository userRepository;
+    private final TagRepository tagRepository;
+    private final EventTagRepository eventTagRepository;
 
     /**
      * Constructs the EventService with a dependency on the EventRepository.
      *
      * @param eventRepository The repository responsible for event data access.
+     * @param userRepository The repository responsible for user data access.
+     * @param tagRepository The repository responsible for event data access.
+     * @param eventTagRepository The repository responsible for event tag data
+     * access.
      */
-    public EventService(EventRepository eventRepository) {
+    public EventService(EventRepository eventRepository,
+            UserRepository userRepository,
+            TagRepository tagRepository,
+            EventTagRepository eventTagRepository) {
         this.eventRepository = eventRepository;
+        this.userRepository = userRepository;
+        this.tagRepository = tagRepository;
+        this.eventTagRepository = eventTagRepository;
     }
 
     /**
@@ -43,17 +63,9 @@ public class EventService {
      */
     public List<EventDto> findEventsByDateRange(UUID userId,
             List<UUID> calendarIds, Instant start, Instant end) {
-
-        System.out.println("Backend received Start Time (UTC): " + start);
-        System.out.println("Backend received End Time (UTC): " + end);
-        System.out.println("userId is: " + userId);
-        System.out.println("calendarIds are: " + calendarIds);
         List<Event> events = eventRepository
                 .findEventsForUserByCalendarIdsAndDateRange(userId,
                         calendarIds, start, end);
-
-        System.out.println("Database query found " + events.size() + " events.");
-
         return events.stream()
                 .map(this::mapToDto)
                 .collect(Collectors.toList());
@@ -76,5 +88,41 @@ public class EventService {
         dto.setDurationInMinutes(eventEntity.getDurationInMinutes());
         dto.setColor(eventEntity.getCalendar().getColor());
         return dto;
+    }
+
+    /**
+     * Updates the tags related to a user's event.
+     *
+     * @param userId The user id the event and tags belongs to.
+     * @param eventId The event id to relate tags to.
+     * @param tagIds A list of tags to relate to the event.
+     * @throws ResourceNotFoundException If any user, event, or tag is not
+     * found.
+     */
+    @Transactional
+    public void updateEventTags(UUID userId, UUID eventId, List<UUID> tagIds) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not "
+                + "found: " + userId));
+        // Validate that the event belongs to the current user
+        Event event = eventRepository.findByUserIdAndId(userId, eventId)
+                .orElseThrow(() -> new ResourceNotFoundException("Event with id "
+                + eventId + " not found for user id " + userId));
+        if (tagIds == null || tagIds.isEmpty()) {
+            eventTagRepository.deleteByEvent(event);
+            return;
+        }
+        List<Tag> tags = tagRepository.findAllByUserAndIdIn(user, tagIds);
+        if (tags.size() != tagIds.size()) {
+            throw new ResourceNotFoundException("One or more tags not found.");
+        }
+        eventTagRepository.deleteByEvent(event);
+        List<EventTag> newEventTags = tags.stream().map(tag -> {
+            EventTag eventTag = new EventTag();
+            eventTag.setEvent(event);
+            eventTag.setTag(tag);
+            return eventTag;
+        }).collect(Collectors.toList());
+        eventTagRepository.saveAll(newEventTags);
     }
 }

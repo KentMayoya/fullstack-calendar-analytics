@@ -4,14 +4,21 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import app.calendaranalytics.api.dtos.EventDto;
+import app.calendaranalytics.api.dtos.UpdateEventTagsRequestDto;
+import app.calendaranalytics.api.exception.ResourceNotFoundException;
 import app.calendaranalytics.api.services.EventService;
 
 @RestController
@@ -54,5 +61,27 @@ public class EventController {
         List<EventDto> events = eventService.findEventsByDateRange(userId,
                 calendarIds, start, end);
         return ResponseEntity.ok(events);
+    }
+
+    /**
+     * Updates all the event tags related to an event with the tags in the
+     * requestDto.
+     *
+     * @param eventId The event whose tags will be updated.
+     * @param requestDto A JSON containing a list of tag ids to relate to the
+     * event.
+     * @param authentication An object provided by the Spring Security
+     * framework. Contains all the information regarding the currently logged-in
+     * user.
+     * @throws ResourceNotFoundException If any user, event, or tag is not
+     * found.
+     */
+    @PutMapping("/{eventId}/tags")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void updateEventTags(@PathVariable UUID eventId,
+            @RequestBody UpdateEventTagsRequestDto requestDto,
+            Authentication authentication) {
+        UUID userId = UUID.fromString(authentication.getName());
+        eventService.updateEventTags(userId, eventId, requestDto.getTagIds());
     }
 }

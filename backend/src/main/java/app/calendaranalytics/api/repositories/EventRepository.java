@@ -2,6 +2,7 @@ package app.calendaranalytics.api.repositories;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -54,4 +55,21 @@ public interface EventRepository extends JpaRepository<Event, UUID> {
      */
     public List<Event> findAllByGoogleEventIdInAndCalendar(List<String> googleEventIds,
             Calendar calendar);
+
+    /**
+     * Retrieves an Event that belongs to a specific user and matches a specific
+     * event id.
+     *
+     * @param userId The user id related to the event.
+     * @param id The event id to query for.
+     * @return An Event, if it exists.
+     */
+    @Query("""
+        SELECT e 
+        FROM Event e 
+        WHERE e.calendar.user.id = :userId
+        AND e.id = :eventId 
+    """)
+    public Optional<Event> findByUserIdAndId(@Param("userId") UUID userId,
+            @Param("eventId") UUID eventId);
 }

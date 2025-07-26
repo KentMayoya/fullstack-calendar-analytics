@@ -44,4 +44,14 @@ public interface TagRepository extends JpaRepository<Tag, UUID> {
      * @return An Optional Tag Entity.
      */
     public Optional<Tag> findByUserAndId(User user, UUID id);
+
+    /**
+     * Retrieves a list of tags that are related to the specified user and match
+     * the id in ids.
+     *
+     * @param user The user to search for related tags.
+     * @param ids A list of Tag ids.
+     * @return A list of tags that exist in the database.
+     */
+    public List<Tag> findAllByUserAndIdIn(User user, List<UUID> ids);
 }
