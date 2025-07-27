@@ -149,7 +149,6 @@ const SettingsPage = () => {
 
   // Deletes the selected tag from the database.
   const handleDeleteClick = async (id: string) => {
-    console.log("delete was clicked!");
     if (!session?.access_token) {
       return;
     }

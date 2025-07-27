@@ -4,7 +4,6 @@ import { Box, Toolbar } from "@mui/material";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
-import interactionPlugin from "@fullcalendar/interaction";
 import type { EventInput, DatesSetArg } from "@fullcalendar/core";
 import CalendarToolbar from "../components/CalendarToolbar";
 import { useUser } from "../setup/app-context-manager/UserContext";
@@ -37,12 +36,13 @@ const CalendarPage = () => {
 
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
+  // Fetches the events for the calendars the user selected to display for
+  // the current view (e.g. week)
   useEffect(() => {
     if (!viewInfo || !session?.access_token || selectedIds.size === 0) {
       setEvents([]);
       return;
     }
-    console.log("Attempting to fetch events!");
     const fetchEvents = async () => {
       const calendarIds = Array.from(selectedIds).join(",");
       try {
@@ -75,11 +75,7 @@ const CalendarPage = () => {
           backgroundColor: event.color,
           borderColor: event.color,
         }));
-        console.log(
-          "Data received from API. Found " + formattedEvents.length + " events."
-        );
         setEvents(formattedEvents);
-        console.log("Formatted:", formattedEvents);
       } catch (error) {
         console.error("Error fetching events: ", error);
       }
@@ -128,7 +124,6 @@ const CalendarPage = () => {
     };
     setSelectedEvent(eventData);
     setIsApplyTagsModalOpen(true);
-    console.log("This event was clicked! - " + selectedEvent?.title);
   };
 
   return (
@@ -151,7 +146,7 @@ const CalendarPage = () => {
       <Box sx={{ flexGrow: 1, p: 2, overflow: "hidden" }}>
         <FullCalendar
           ref={calendarRef}
-          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+          plugins={[dayGridPlugin, timeGridPlugin]}
           initialView="timeGridWeek"
           headerToolbar={false}
           datesSet={handleDatesSet}
@@ -163,6 +158,8 @@ const CalendarPage = () => {
       <Box>
         {isApplyTagsModalOpen && (
           <ApplyTagsModal
+            eventId={selectedEvent?.id}
+            title={selectedEvent?.title}
             handleClose={() => setIsApplyTagsModalOpen(false)}
           ></ApplyTagsModal>
         )}
