@@ -138,7 +138,7 @@ export const CalendarContextProvider = ({
         throw new Error(`API call failed with status: ${response.status}`);
       }
       // If currentStatus is true, toggling was just set to false
-      if (currentStatus === true) {
+      if (currentStatus) {
         setSelectedIds((prevIds) => {
           const newIds = new Set(prevIds);
           newIds.delete(calendarId);
