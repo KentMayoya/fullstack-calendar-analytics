@@ -137,6 +137,18 @@ export const CalendarContextProvider = ({
       if (!response.ok) {
         throw new Error(`API call failed with status: ${response.status}`);
       }
+      // If currentStatus is true, toggling was just set to false
+      if (currentStatus === true) {
+        setSelectedIds((prevIds) => {
+          const newIds = new Set(prevIds);
+          newIds.delete(calendarId);
+          localStorage.setItem(
+            SELECTED_CALENDARS_ID_KEY,
+            JSON.stringify(Array.from(newIds))
+          );
+          return newIds;
+        });
+      }
     } catch (err) {
       console.log(err);
       // Toggle failed, undo the optimistic UI toggle update.
