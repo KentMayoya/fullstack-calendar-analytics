@@ -94,7 +94,7 @@ public class EventController {
      * @param authentication An object provided by the Spring Security
      * framework. Contains all the information regarding the currently logged-in
      * user.
-     * @return A 200 OK with a list of TagDtos related to
+     * @return A 200 OK with a list of TagDtos related to the specified event.
      */
     @GetMapping("/{eventId}/tags")
     @ResponseStatus(HttpStatus.OK)
