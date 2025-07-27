@@ -4,7 +4,6 @@ import { Box, Toolbar } from "@mui/material";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
-import interactionPlugin from "@fullcalendar/interaction";
 import type { EventInput, DatesSetArg } from "@fullcalendar/core";
 import CalendarToolbar from "../components/CalendarToolbar";
 import { useUser } from "../setup/app-context-manager/UserContext";
@@ -147,7 +146,7 @@ const CalendarPage = () => {
       <Box sx={{ flexGrow: 1, p: 2, overflow: "hidden" }}>
         <FullCalendar
           ref={calendarRef}
-          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+          plugins={[dayGridPlugin, timeGridPlugin]}
           initialView="timeGridWeek"
           headerToolbar={false}
           datesSet={handleDatesSet}
