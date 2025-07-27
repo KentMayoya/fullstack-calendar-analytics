@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
 import { useUser } from "../setup/app-context-manager/UserContext";
 
-export const useTags = () => {
-  interface Tag {
-    id: string;
-    name: string;
-  }
+export interface Tag {
+  id: string;
+  name: string;
+}
 
+export const useTags = () => {
   const context = useUser();
   const { session } = context;
   const [tags, setTags] = useState<Tag[]>([]); 
@@ -41,6 +41,7 @@ export const useTags = () => {
     }
   }, [session?.access_token, API_BASE_URL])
 
+  // Fetches the user's tags
   useEffect(() => {
     fetchTags();
   }, [fetchTags])
