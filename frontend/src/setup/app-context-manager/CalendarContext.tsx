@@ -4,6 +4,7 @@ import {
   useState,
   useEffect,
   useCallback,
+  useMemo,
 } from "react";
 import { useUser } from "./UserContext";
 import type { ReactNode } from "react";
@@ -32,6 +33,7 @@ export const toggleIdInSet = (
 interface CalendarContextType {
   calendars: Calendar[];
   setCalendars: React.Dispatch<React.SetStateAction<Calendar[]>>;
+  syncedCalendars: Calendar[];
   loading: boolean;
   error: string;
   selectedIds: Set<string>;
@@ -51,6 +53,12 @@ export const CalendarContextProvider = ({
 }) => {
   const { session } = useUser();
   const [calendars, setCalendars] = useState<Calendar[]>([]);
+
+  // filters out unsynced calendars
+  const syncedCalendars = useMemo(() => {
+    return calendars.filter((calendar) => calendar.isSynced);
+  }, [calendars]);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -157,6 +165,7 @@ export const CalendarContextProvider = ({
   const value = {
     calendars,
     setCalendars,
+    syncedCalendars,
     loading,
     error,
     selectedIds,

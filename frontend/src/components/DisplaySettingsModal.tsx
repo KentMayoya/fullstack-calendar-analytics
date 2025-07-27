@@ -21,7 +21,7 @@ type DisplaySettingsModalProps = {
 
 const DisplaySettingsModal = ({ handleClose }: DisplaySettingsModalProps) => {
   const {
-    calendars,
+    syncedCalendars,
     loading,
     selectedIds: savedSelectedIds,
     saveSelectedIds,
@@ -77,7 +77,7 @@ const DisplaySettingsModal = ({ handleClose }: DisplaySettingsModalProps) => {
           >
             {loading && <CircularProgress />}
             {!loading &&
-              (calendars.length === 0 ? (
+              (syncedCalendars.length === 0 ? (
                 <Typography
                   sx={{ color: "text.secondary", textAlign: "center" }}
                 >
@@ -85,7 +85,7 @@ const DisplaySettingsModal = ({ handleClose }: DisplaySettingsModalProps) => {
                 </Typography>
               ) : (
                 // If not empty, map over the array as before
-                calendars.map((calendar) => (
+                syncedCalendars.map((calendar) => (
                   <FormControlLabel
                     key={calendar.id}
                     control={
@@ -113,7 +113,7 @@ const DisplaySettingsModal = ({ handleClose }: DisplaySettingsModalProps) => {
             <Button variant="contained" color="primary" onClick={handleClose}>
               Cancel
             </Button>
-            {calendars.length > 0 ? (
+            {syncedCalendars.length > 0 ? (
               <Button variant="contained" color="primary" onClick={handleSave}>
                 Save
               </Button>
