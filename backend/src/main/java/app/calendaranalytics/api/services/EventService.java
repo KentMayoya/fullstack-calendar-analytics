@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import app.calendaranalytics.api.dtos.EventDto;
+import app.calendaranalytics.api.dtos.TagDto;
 import app.calendaranalytics.api.entities.Event;
 import app.calendaranalytics.api.entities.EventTag;
 import app.calendaranalytics.api.entities.Tag;
@@ -124,5 +125,35 @@ public class EventService {
             return eventTag;
         }).collect(Collectors.toList());
         eventTagRepository.saveAll(newEventTags);
+    }
+
+    /**
+     * Returns a list of TagDtos that are related to the specific event.
+     *
+     * @param userId The user id the event belongs to.
+     * @param eventId The event id to find related tags.
+     * @return A list of TagDtos that are related to the specified event.
+     */
+    public List<TagDto> getEventTags(UUID userId, UUID eventId) {
+        // Validate that the event belongs to the current user
+        eventRepository.findByUserIdAndId(userId, eventId)
+                .orElseThrow(() -> new ResourceNotFoundException("Event with id "
+                + eventId + " not found for user id " + userId));
+        List<Tag> tags = tagRepository.findAllByEventId(eventId);
+        return tags.stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Helper method that maps the private Tag Entity to the public TagDto.
+     *
+     * @param tagEntity The Tag entity to convert.
+     */
+    private TagDto mapToDto(Tag tagEntity) {
+        TagDto dto = new TagDto();
+        dto.setId(tagEntity.getId());
+        dto.setName(tagEntity.getName());
+        return dto;
     }
 }

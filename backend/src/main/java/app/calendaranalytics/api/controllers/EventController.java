@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import app.calendaranalytics.api.dtos.EventDto;
+import app.calendaranalytics.api.dtos.TagDto;
 import app.calendaranalytics.api.dtos.UpdateEventTagsRequestDto;
 import app.calendaranalytics.api.exception.ResourceNotFoundException;
 import app.calendaranalytics.api.services.EventService;
@@ -83,5 +84,23 @@ public class EventController {
             Authentication authentication) {
         UUID userId = UUID.fromString(authentication.getName());
         eventService.updateEventTags(userId, eventId, requestDto.getTagIds());
+    }
+
+    /**
+     * Retrieves a list of TagDtos related to an event that belongs to a
+     * specific user (defined in Authentication).
+     *
+     * @param eventId The event whose tags will be retrieved.
+     * @param authentication An object provided by the Spring Security
+     * framework. Contains all the information regarding the currently logged-in
+     * user.
+     * @return A 200 OK with a list of TagDtos related to
+     */
+    @GetMapping("/{eventId}/tags")
+    @ResponseStatus(HttpStatus.OK)
+    public List<TagDto> getEventTags(@PathVariable UUID eventId,
+            Authentication authentication) {
+        UUID userId = UUID.fromString(authentication.getName());
+        return eventService.getEventTags(userId, eventId);
     }
 }

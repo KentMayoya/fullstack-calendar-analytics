@@ -5,6 +5,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import app.calendaranalytics.api.entities.Tag;
 import app.calendaranalytics.api.entities.User;
@@ -54,4 +56,20 @@ public interface TagRepository extends JpaRepository<Tag, UUID> {
      * @return A list of tags that exist in the database.
      */
     public List<Tag> findAllByUserAndIdIn(User user, List<UUID> ids);
+
+    /**
+     * Retrieves a list of Tags that are related to the specific event. This
+     * method does not filter out tags for a specific user. Exposed APIs that
+     * use this method should check if the event belongs to a user before using.
+     *
+     * @param eventId The eventId to search for related tags.
+     * @return A list of Tags that are related to an event through the EventTag
+     * join table.
+     */
+    @Query("""
+        SELECT et.tag
+        FROM EventTag et
+        WHERE et.event.id = :eventId
+            """)
+    public List<Tag> findAllByEventId(@Param("eventId") UUID eventId);
 }
