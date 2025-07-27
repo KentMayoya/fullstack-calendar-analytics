@@ -24,7 +24,7 @@ const SyncSettingsModal = ({ handleClose }: SyncSettingsModalProps) => {
 
   // calendars contains a list of Calendars' id, name, and isSynced
   // loading is true if the calendars are still being fetched. Otherwise, false
-  const { calendars, loading } = useCalendar();
+  const { syncedCalendars, loading } = useCalendar();
 
   const navigate = useNavigate();
 
@@ -101,7 +101,7 @@ const SyncSettingsModal = ({ handleClose }: SyncSettingsModalProps) => {
           >
             {loading && <CircularProgress />}
             {!loading &&
-              (calendars.length === 0 ? (
+              (syncedCalendars.length === 0 ? (
                 <Typography
                   sx={{ color: "text.secondary", textAlign: "center" }}
                 >
@@ -109,7 +109,7 @@ const SyncSettingsModal = ({ handleClose }: SyncSettingsModalProps) => {
                 </Typography>
               ) : (
                 // If not empty, map over the array as before
-                calendars.map((calendar) => (
+                syncedCalendars.map((calendar) => (
                   <FormControlLabel
                     key={calendar.id}
                     control={
@@ -133,7 +133,7 @@ const SyncSettingsModal = ({ handleClose }: SyncSettingsModalProps) => {
             <Button variant="contained" color="primary" onClick={handleClose}>
               Cancel
             </Button>
-            {calendars.length > 0 ? (
+            {syncedCalendars.length > 0 ? (
               <Button
                 variant="contained"
                 color="primary"
