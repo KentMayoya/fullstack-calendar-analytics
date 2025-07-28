@@ -10,6 +10,13 @@ interface CalendarToolbarProps {
   onNextClick: () => void;
 }
 
+const iconStyle = {
+  border: "2px solid black",
+  borderRadius: 2,
+  px: 0.5,
+  py: 0.5,
+};
+
 const CalendarToolbar = ({
   title,
   onPrevClick,
@@ -24,41 +31,20 @@ const CalendarToolbar = ({
         sx={{ top: (theme) => theme.mixins.toolbar.minHeight }}
       >
         <Toolbar>
-          <IconButton
-            onClick={onPrevClick}
-            sx={{
-              border: "2px solid",
-              borderColor: "black",
-              borderRadius: 2,
-              px: 0.5,
-              py: 0.5,
-            }}
-          >
+          <IconButton onClick={onPrevClick} sx={iconStyle}>
             <ChevronLeftIcon />
           </IconButton>
           <Button
             onClick={onTodayClick}
             sx={{
+              ...iconStyle,
               color: "black",
-              border: "2px solid black",
-              borderRadius: "2",
-              px: 0.5,
-              py: 0.5,
               m: 0.5,
             }}
           >
             Today
           </Button>
-          <IconButton
-            onClick={onNextClick}
-            sx={{
-              border: "2px solid",
-              borderColor: "black",
-              borderRadius: 2,
-              px: 0.5,
-              py: 0.5,
-            }}
-          >
+          <IconButton onClick={onNextClick} sx={iconStyle}>
             <ChevronRightIcon />
           </IconButton>
           <Typography sx={{ mx: "auto" }}>{title}</Typography>
