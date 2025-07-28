@@ -32,7 +32,14 @@ function App() {
               </CalendarContextProvider>
             }
           />
-          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route
+            path="/dashboard"
+            element={
+              <CalendarContextProvider>
+                <DashboardPage />
+              </CalendarContextProvider>
+            }
+          />
         </Routes>
       </main>
     </>

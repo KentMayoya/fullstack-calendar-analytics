@@ -13,10 +13,14 @@ import {
   subYears,
   format,
 } from "date-fns";
+import { type Calendar } from "../setup/app-context-manager/CalendarContext";
+import { type Tag } from "../hooks/useTags";
 
 const DashboardPage = () => {
   const [view, setView] = useState<string>("week");
   const [currentDate, setCurrentDate] = useState<Date>(startOfWeek(new Date()));
+  const [selectedCalendars, setSelectedCalendars] = useState<Calendar[]>([]);
+  const [selectedTag, setSelectedTag] = useState<Tag | null>(null);
 
   // Sets the date range back by the period specified in view
   const onPrevClick = () => {
@@ -68,6 +72,10 @@ const DashboardPage = () => {
         setView={setView}
         onPrevClick={onPrevClick}
         onNextClick={onNextClick}
+        selectedCalendars={selectedCalendars}
+        setSelectedCalendars={setSelectedCalendars}
+        selectedTag={selectedTag}
+        setSelectedTag={setSelectedTag}
       />
       <h1>This a dashboard</h1>
     </>

@@ -1,16 +1,22 @@
 import {
   AppBar,
+  Autocomplete,
   Box,
-  Button,
   Divider,
   IconButton,
   ToggleButton,
   ToggleButtonGroup,
   Toolbar,
   Typography,
+  TextField,
 } from "@mui/material";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import {
+  useCalendar,
+  type Calendar,
+} from "../setup/app-context-manager/CalendarContext";
+import { type Tag, useTags } from "../hooks/useTags";
 
 interface DashboardToolbarProps {
   title: string;
@@ -18,6 +24,10 @@ interface DashboardToolbarProps {
   setView: (newView: string) => void;
   onPrevClick: () => void;
   onNextClick: () => void;
+  selectedCalendars: Calendar[];
+  setSelectedCalendars: (calendar: Calendar[]) => void;
+  selectedTag: Tag | null;
+  setSelectedTag: (tag: Tag | null) => void;
 }
 
 const iconStyle = {
@@ -33,7 +43,15 @@ const DashboardToolbar = ({
   setView,
   onPrevClick,
   onNextClick,
+  selectedCalendars,
+  setSelectedCalendars,
+  selectedTag,
+  setSelectedTag,
 }: DashboardToolbarProps) => {
+  const { syncedCalendars } = useCalendar();
+  const { tags } = useTags();
+
+  // Updates the view state when a new view is selected
   const handleViewChange = (
     event: React.MouseEvent<HTMLElement>,
     newView: string | null
@@ -95,30 +113,35 @@ const DashboardToolbar = ({
           <ChevronRightIcon />
         </IconButton>
       </Box>
+      <Box sx={{ p: 1 }}>
+        <Autocomplete
+          multiple
+          options={syncedCalendars}
+          getOptionLabel={(option) => option.name}
+          value={selectedCalendars}
+          onChange={(event, newValue) => {
+            setSelectedCalendars(newValue);
+          }}
+          isOptionEqualToValue={(option, value) => option.id === value.id}
+          renderInput={(params) => (
+            <TextField {...params} variant="standard" label="Calendars" />
+          )}
+        />
+        <Autocomplete
+          sx={{ mt: 2 }}
+          options={tags}
+          getOptionLabel={(option) => option.name}
+          value={selectedTag}
+          onChange={(event, newValue) => {
+            setSelectedTag(newValue);
+          }}
+          isOptionEqualToValue={(option, value) => option.id === value.id}
+          renderInput={(params) => (
+            <TextField {...params} variant="standard" label="Tag" />
+          )}
+        />
+      </Box>
     </>
-  );
-};
-
-type ReusableButtonProps = {
-  text: string;
-  onClick: () => void;
-};
-
-const ReusableButton = ({ text, onClick }: ReusableButtonProps) => {
-  return (
-    <Button
-      sx={{
-        color: "white",
-        border: "2px solid white",
-        borderRadius: "2",
-        px: 0.5,
-        py: 0.5,
-        m: 0.5,
-      }}
-      onClick={onClick}
-    >
-      {text}
-    </Button>
   );
 };
 

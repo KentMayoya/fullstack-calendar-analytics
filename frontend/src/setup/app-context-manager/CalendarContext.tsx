@@ -9,7 +9,7 @@ import {
 import { useUser } from "./UserContext";
 import type { ReactNode } from "react";
 
-interface Calendar {
+export interface Calendar {
   id: string;
   name: string;
   isSynced: boolean;
