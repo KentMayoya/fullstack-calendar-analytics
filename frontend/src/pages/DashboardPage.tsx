@@ -1,6 +1,10 @@
-import { useState, useMemo } from "react";
-import DashboardToolbar from "../components/DashboardToolBar";
+import { useState, useMemo, useCallback, useEffect } from "react";
+import DashboardToolbar from "../components/DashboardToolbar";
 import {
+  startOfYear,
+  endOfYear,
+  startOfMonth,
+  endOfMonth,
   startOfWeek,
   endOfWeek,
   addDays,
@@ -15,23 +19,35 @@ import {
 } from "date-fns";
 import { type Calendar } from "../setup/app-context-manager/CalendarContext";
 import { type Tag } from "../hooks/useTags";
+import { useUser } from "../setup/app-context-manager/UserContext";
+import { Box, Typography, Paper } from "@mui/material";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import EventIcon from "@mui/icons-material/Event";
+
+interface SummaryData {
+  totalMinutes: number;
+  totalEvents: number;
+}
 
 const DashboardPage = () => {
   const [view, setView] = useState<string>("week");
   const [currentDate, setCurrentDate] = useState<Date>(startOfWeek(new Date()));
   const [selectedCalendars, setSelectedCalendars] = useState<Calendar[]>([]);
   const [selectedTag, setSelectedTag] = useState<Tag | null>(null);
+  const { session } = useUser();
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+  const [summaryData, setSummaryData] = useState<SummaryData | null>(null);
 
   // Sets the date range back by the period specified in view
   const onPrevClick = () => {
     if (view === "day") {
       setCurrentDate((prevDate) => subDays(prevDate, 1));
     } else if (view === "week") {
-      setCurrentDate((prevDate) => subWeeks(prevDate, 1));
+      setCurrentDate((prevDate) => subWeeks(startOfWeek(prevDate), 1));
     } else if (view === "month") {
-      setCurrentDate((prevDate) => subMonths(prevDate, 1));
+      setCurrentDate((prevDate) => subMonths(startOfMonth(prevDate), 1));
     } else {
-      setCurrentDate((prevDate) => subYears(prevDate, 1));
+      setCurrentDate((prevDate) => subYears(startOfYear(prevDate), 1));
     }
   };
 
@@ -40,11 +56,11 @@ const DashboardPage = () => {
     if (view === "day") {
       setCurrentDate((prevDate) => addDays(prevDate, 1));
     } else if (view === "week") {
-      setCurrentDate((prevDate) => addWeeks(prevDate, 1));
+      setCurrentDate((prevDate) => addWeeks(startOfWeek(prevDate), 1));
     } else if (view === "month") {
-      setCurrentDate((prevDate) => addMonths(prevDate, 1));
+      setCurrentDate((prevDate) => addMonths(startOfMonth(prevDate), 1));
     } else {
-      setCurrentDate((prevDate) => addYears(prevDate, 1));
+      setCurrentDate((prevDate) => addYears(startOfYear(prevDate), 1));
     }
   };
 
@@ -53,7 +69,7 @@ const DashboardPage = () => {
     if (view === "day") {
       return format(currentDate, "MMMM d, yyyy");
     } else if (view === "week") {
-      const start = currentDate;
+      const start = startOfWeek(currentDate);
       const end = endOfWeek(start);
       return `${format(start, "MMM d")} - ${format(end, "MMM d, yyyy")}`;
     } else if (view === "month") {
@@ -63,6 +79,75 @@ const DashboardPage = () => {
     }
     return "";
   }, [currentDate, view]);
+
+  const fetchSummary = useCallback(async () => {
+    if (
+      !session?.access_token ||
+      selectedCalendars.length === 0 ||
+      !selectedTag
+    ) {
+      return;
+    }
+    try {
+      let start: Date;
+      let end: Date;
+      // Set the start and end dates
+      if (view === "day") {
+        start = currentDate;
+        end = currentDate;
+      } else if (view === "week") {
+        start = startOfWeek(currentDate);
+        end = endOfWeek(currentDate);
+      } else if (view === "month") {
+        start = startOfMonth(currentDate);
+        end = endOfMonth(currentDate);
+      } else {
+        start = startOfYear(currentDate);
+        end = endOfYear(currentDate);
+      }
+      // Format query parameters for the endpoint
+      const startDateString = format(start, "yyyy-MM-dd");
+      const endDateString = format(end, "yyyy-MM-dd");
+      const calendarIdList = selectedCalendars.map((c) => c.id).join(",");
+      const tagId = selectedTag.id;
+      const url =
+        `${API_BASE_URL}/api/v1/analytics/summary` +
+        `?start=${startDateString}&end=${endDateString}` +
+        `&calendarIds=${calendarIdList}&tagId=${tagId}`;
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+      const data = await response.json();
+      setSummaryData(data);
+    } catch (error: any) {
+      console.error("Failed to fetch the summary.", error);
+    }
+  }, [
+    currentDate,
+    view,
+    selectedCalendars,
+    selectedTag,
+    session?.access_token,
+    API_BASE_URL,
+  ]);
+
+  // Fetch the summary upon mounting
+  useEffect(() => {
+    fetchSummary();
+  }, [fetchSummary]);
+
+  // Fix the displayed date when view is changed
+  useEffect(() => {
+    if (view === "week") {
+      setCurrentDate(startOfWeek(currentDate));
+    } else if (view === "month") {
+      setCurrentDate(startOfMonth(currentDate));
+    } else if (view === "year") {
+      setCurrentDate(startOfYear(currentDate));
+    }
+  }, [view]);
 
   return (
     <>
@@ -77,7 +162,26 @@ const DashboardPage = () => {
         selectedTag={selectedTag}
         setSelectedTag={setSelectedTag}
       />
-      <h1>This a dashboard</h1>
+      {summaryData && (
+        <Paper sx={{ p: 1, backgroundColor: "azure" }}>
+          <Typography
+            component="h2"
+            variant="h6"
+            fontWeight="bold"
+            gutterBottom
+          >
+            Summary
+          </Typography>
+          <Box sx={{ display: "flex", mb: 1 }}>
+            <AccessTimeIcon sx={{ mr: 1 }} />
+            <Typography>Total Minutes: {summaryData.totalMinutes}</Typography>
+          </Box>
+          <Box sx={{ display: "flex", mb: 1 }}>
+            <EventIcon sx={{ mr: 1 }} />
+            <Typography>Total Events: {summaryData.totalEvents}</Typography>
+          </Box>
+        </Paper>
+      )}
     </>
   );
 };

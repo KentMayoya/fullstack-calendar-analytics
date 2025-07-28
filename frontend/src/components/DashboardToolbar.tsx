@@ -115,6 +115,9 @@ const DashboardToolbar = ({
       </Box>
       <Box sx={{ p: 1 }}>
         <Autocomplete
+          sx={{
+            mt: selectedCalendars.length === 0 ? 0 : 1,
+          }}
           multiple
           options={syncedCalendars}
           getOptionLabel={(option) => option.name}
@@ -128,7 +131,9 @@ const DashboardToolbar = ({
           )}
         />
         <Autocomplete
-          sx={{ mt: 2 }}
+          sx={{
+            mt: selectedTag === null ? 0 : 2,
+          }}
           options={tags}
           getOptionLabel={(option) => option.name}
           value={selectedTag}
