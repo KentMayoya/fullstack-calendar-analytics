@@ -6,11 +6,13 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.format.TextStyle;
 import java.time.temporal.TemporalAdjusters;
+import java.time.temporal.WeekFields;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.springframework.stereotype.Service;
@@ -106,8 +108,7 @@ public class AnalyticsService {
      * Converts a list of events into a a list of AnalyticsDataPointDto.
      *
      * @param events A list of events within a range.
-     * @param range The range for the breakdown. Currently accepts only week.
-     * Day, month, and year is not yet implemented.
+     * @param range The range for the breakdown.
      * @return An AnalyticsDataPointDto with the total number of minutes for
      * each category depending on the range.
      */
@@ -140,6 +141,22 @@ public class AnalyticsService {
                                 .collect(Collectors.toList());
                 return result;
             }
+            case "month" -> {
+                Map<Integer, Long> minutesPerWeek = events.stream()
+                        .collect(Collectors.groupingBy(
+                                event -> event.getStartTime().atZone(ZoneOffset.UTC)
+                                        .get(WeekFields.of(Locale.US).weekOfMonth()),
+                                Collectors.summingLong(event
+                                        -> (long) event.getDurationInMinutes())
+                        ));
+                List<AnalyticsDataPointDto> result
+                        = IntStream.rangeClosed(1, 5).mapToObj(weekNum
+                                -> new AnalyticsDataPointDto("Week " + weekNum, minutesPerWeek
+                                .getOrDefault(weekNum, 0L)
+                        ))
+                                .collect(Collectors.toList());
+                return result;
+            }
             default ->
                 throw new IllegalArgumentException(range + " is not a valid range.");
         }
@@ -163,20 +180,28 @@ public class AnalyticsService {
      * @return A DateRange which contains a start and end date.
      */
     private DateRange calculateDateRange(LocalDate date, String range) {
-        Instant start, end;
-        switch (range) {
+        return switch (range) {
             case "week" -> {
                 LocalDate startOfWeek = date.with(TemporalAdjusters
                         .previousOrSame(DayOfWeek.SUNDAY));
                 LocalDate endOfWeek = date.with(TemporalAdjusters
                         .nextOrSame(DayOfWeek.SATURDAY));
-                start = startOfWeek.atStartOfDay(ZoneOffset.UTC).toInstant();
-                end = endOfWeek.plusDays(1).atStartOfDay(ZoneOffset.UTC)
+                Instant start = startOfWeek.atStartOfDay(ZoneOffset.UTC).toInstant();
+                Instant end = endOfWeek.plusDays(1).atStartOfDay(ZoneOffset.UTC)
                         .toInstant();
+                yield new DateRange(start, end);
+            }
+            case "month" -> {
+                LocalDate startOfMonth = date.with(TemporalAdjusters
+                        .firstDayOfMonth());
+                LocalDate endOfMonth = date.with(TemporalAdjusters
+                        .lastDayOfMonth());
+                Instant start = startOfMonth.atStartOfDay(ZoneOffset.UTC).toInstant();
+                Instant end = endOfMonth.plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant();
+                yield new DateRange(start, end);
             }
             default ->
                 throw new IllegalArgumentException("Invalid range specified");
-        }
-        return new DateRange(start, end);
+        };
     }
 }
