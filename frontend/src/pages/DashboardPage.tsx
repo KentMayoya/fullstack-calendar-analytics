@@ -23,10 +23,16 @@ import { useUser } from "../setup/app-context-manager/UserContext";
 import { Box, Typography, Paper } from "@mui/material";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import EventIcon from "@mui/icons-material/Event";
+import WeeklyBarChart from "../components/graphs/WeeklyBarChart";
 
 interface SummaryData {
   totalMinutes: number;
   totalEvents: number;
+}
+
+interface BreakdownData {
+  name: string;
+  minutes: number;
 }
 
 const DashboardPage = () => {
@@ -37,6 +43,9 @@ const DashboardPage = () => {
   const { session } = useUser();
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const [summaryData, setSummaryData] = useState<SummaryData | null>(null);
+  const [breakdownData, setBreakdownData] = useState<BreakdownData[] | null>(
+    []
+  );
 
   // Sets the date range back by the period specified in view
   const onPrevClick = () => {
@@ -80,12 +89,14 @@ const DashboardPage = () => {
     return "";
   }, [currentDate, view]);
 
+  // Fetches the total minutes and events for the current period
   const fetchSummary = useCallback(async () => {
     if (
       !session?.access_token ||
       selectedCalendars.length === 0 ||
       !selectedTag
     ) {
+      setSummaryData(null);
       return;
     }
     try {
@@ -133,10 +144,66 @@ const DashboardPage = () => {
     API_BASE_URL,
   ]);
 
+  // Fetches the minutes for each breakdown in the current period
+  const fetchBreakdownData = useCallback(async () => {
+    if (
+      !session?.access_token ||
+      selectedCalendars.length === 0 ||
+      !selectedTag
+    ) {
+      setBreakdownData([]);
+      return;
+    }
+    try {
+      const dateString = format(currentDate, "yyyy-MM-dd");
+      const calendarIdList = selectedCalendars.map((c) => c.id).join(",");
+      const tagId = selectedTag.id;
+      const url =
+        `${API_BASE_URL}/api/v1/analytics/breakdown?range=${view}` +
+        `&date=${dateString}&calendarIds=${calendarIdList}&tagId=${tagId}`;
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error("Failed to fetch breakdown data.");
+      }
+      const data = await response.json();
+      setBreakdownData(data);
+    } catch (error: any) {
+      console.error("Failed to fetch breakdown data.", error);
+    }
+  }, [
+    currentDate,
+    view,
+    selectedCalendars,
+    selectedTag,
+    session?.access_token,
+    API_BASE_URL,
+  ]);
+
+  // Sets the title for the bar graph
+  const breakdownTitle = useMemo(() => {
+    switch (view) {
+      case "day":
+        return "Daily";
+      case "week":
+        return "Weekly";
+      case "month":
+        return "Monthly";
+      case "year":
+        return "Yearly";
+      default:
+        return "";
+    }
+  }, [view]);
+
   // Fetch the summary upon mounting
   useEffect(() => {
     fetchSummary();
-  }, [fetchSummary]);
+    fetchBreakdownData();
+  }, [fetchSummary, fetchBreakdownData]);
 
   // Fix the displayed date when view is changed
   useEffect(() => {
@@ -182,6 +249,28 @@ const DashboardPage = () => {
           </Box>
         </Paper>
       )}
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          p: 2,
+        }}
+      >
+        {breakdownData && breakdownData.length > 0 && (
+          <Paper sx={{ p: 2, width: "100%" }}>
+            <Typography
+              component="h2"
+              variant="h6"
+              fontWeight="bold"
+              gutterBottom
+            >
+              {breakdownTitle} Breakdown
+            </Typography>
+            <WeeklyBarChart data={breakdownData} />
+          </Paper>
+        )}
+      </Box>
     </>
   );
 };
