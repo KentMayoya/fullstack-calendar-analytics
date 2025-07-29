@@ -13,11 +13,11 @@ interface ChartData {
   minutes: number;
 }
 
-interface WeeklyBarChartProps {
+interface BreakdownBarChartProps {
   data: ChartData[];
 }
 
-const WeeklyBarChart = ({ data }: WeeklyBarChartProps) => {
+const BreakdownBarChart = ({ data }: BreakdownBarChartProps) => {
   return (
     <ResponsiveContainer width="100%" height={300}>
       <BarChart data={data}>
@@ -31,4 +31,4 @@ const WeeklyBarChart = ({ data }: WeeklyBarChartProps) => {
   );
 };
 
-export default WeeklyBarChart;
+export default BreakdownBarChart;
