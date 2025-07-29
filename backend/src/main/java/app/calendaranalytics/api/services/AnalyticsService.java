@@ -1,11 +1,17 @@
 package app.calendaranalytics.api.services;
 
 import java.time.DayOfWeek;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.Month;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
+import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
 import java.time.temporal.WeekFields;
 import java.util.List;
@@ -112,10 +118,23 @@ public class AnalyticsService {
      * @param range The range for the breakdown.
      * @return An AnalyticsDataPointDto with the total number of minutes for
      * each category depending on the range.
+     * @throws IllegalArgumentException If an invalid range is provided.
      */
     private List<AnalyticsDataPointDto> convertToAnalyticsDataPointDto(
             List<Event> events, String range) {
-        switch (range) {
+        return switch (range) {
+            case "day" -> {
+                long[] minutesInHour = collectMinutesToHourlyBuckets(events);
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("ha", Locale.US);
+                List<AnalyticsDataPointDto> result
+                        = IntStream.range(0, 24)
+                                .mapToObj(hour -> new AnalyticsDataPointDto(
+                                LocalTime.of(hour, 0).format(formatter).toLowerCase(),
+                                minutesInHour[hour]
+                        ))
+                                .collect(Collectors.toList());
+                yield result;
+            }
             case "week" -> {
                 Map<DayOfWeek, Long> minutesPerDay = events.stream()
                         .collect(Collectors.groupingBy(
@@ -140,7 +159,7 @@ public class AnalyticsService {
                                 minutesPerDay.getOrDefault(day, 0L)
                         ))
                                 .collect(Collectors.toList());
-                return result;
+                yield result;
             }
             case "month" -> {
                 Map<Integer, Long> minutesPerWeek = events.stream()
@@ -156,7 +175,7 @@ public class AnalyticsService {
                                 .getOrDefault(weekNum, 0L)
                         ))
                                 .collect(Collectors.toList());
-                return result;
+                yield result;
             }
             case "year" -> {
                 Map<Month, Long> minutesPerMonth = events.stream()
@@ -172,11 +191,56 @@ public class AnalyticsService {
                                 minutesPerMonth.getOrDefault(month, 0L)
                         ))
                                 .collect(Collectors.toList());
-                return result;
+                yield result;
             }
             default ->
                 throw new IllegalArgumentException(range + " is not a valid range.");
+        };
+    }
+
+    /**
+     * Collects the duration of events and places them in an array, where each
+     * index represents an hour. Events that are longer than an hour should
+     * spill into the next hour. That does not mean, however, that a bucket
+     * cannot exceed 60 minutes. Multiple events that overlap may result in a
+     * value larger than 60.
+     *
+     * @param events A list of events
+     * @return An array containing the minutes for each hour.
+     */
+    private long[] collectMinutesToHourlyBuckets(List<Event> events) {
+        // Should ideally come from the user's profile, but hardcoded
+        // for now.
+        ZoneId userTimeZone = ZoneId.of("America/Los_Angeles");
+        final int hoursInDay = 24;
+        long[] minutesInHour = new long[hoursInDay];
+        for (Event event : events) {
+            LocalDateTime start = event.getStartTime().atZone(userTimeZone)
+                    .toLocalDateTime();
+            LocalDateTime end = event.getEndTime().atZone(userTimeZone)
+                    .toLocalDateTime();
+            // Start at the beginning of the hour the event starts in
+            // i.e. truncate the minutes. This is used as the index for the bucket
+            LocalDateTime currentHourStart = start.truncatedTo(ChronoUnit.HOURS);
+            while (currentHourStart.isBefore(end)) {
+                LocalDateTime endOfCurrentHour = currentHourStart
+                        .plusHours(1);
+                // Determine the actual start and end time within this 1-hour slice
+                LocalDateTime effectiveStart
+                        = start.isAfter(currentHourStart) ? start : currentHourStart;
+                LocalDateTime effectiveEnd
+                        = end.isBefore(endOfCurrentHour) ? end : endOfCurrentHour;
+                // Calculate the duration of the slice and add it to the bucket
+                long minutesInThisHour = Duration.between(effectiveStart,
+                        effectiveEnd).toMinutes();
+                if (minutesInThisHour > 0) {
+                    minutesInHour[currentHourStart.getHour()] += minutesInThisHour;
+                }
+                // Move to the next hour
+                currentHourStart = currentHourStart.plusHours(1);
+            }
         }
+        return minutesInHour;
     }
 
     /**
@@ -195,9 +259,16 @@ public class AnalyticsService {
      * @param date A date within a range.
      * @param range A time period e.g. week.
      * @return A DateRange which contains a start and end date.
+     * @throws IllegalArgumentException If an invalid range is provided.
      */
     private DateRange calculateDateRange(LocalDate date, String range) {
         return switch (range) {
+            case "day" -> {
+                Instant startOfDay = date.atStartOfDay(ZoneOffset.UTC).toInstant();
+                Instant endOfDay = date.plusDays(1)
+                        .atStartOfDay(ZoneOffset.UTC).toInstant();
+                yield new DateRange(startOfDay, endOfDay);
+            }
             case "week" -> {
                 LocalDate startOfWeek = date.with(TemporalAdjusters
                         .previousOrSame(DayOfWeek.SUNDAY));
