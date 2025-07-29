@@ -129,4 +129,34 @@ public interface EventRepository extends JpaRepository<Event, UUID> {
             @Param("calendarIds") List<UUID> calendarIds,
             @Param("tagId") UUID tagId
     );
+
+    /**
+     * Queries for a list of events that belong to the specified user, within
+     * the date range start and end, are related to the specified calendarIds
+     * and tagId.
+     *
+     * @param userId The related user id to retrieve event analytics for.
+     * @param start Start date filter.
+     * @param end End date filter.
+     * @param calendarIds The calendar ids to search for events.
+     * @param tagId The tag id used to search for events.
+     * @return A list of events found based on the passed filters.
+     */
+    @Query("""
+        SELECT e
+        FROM Event e
+            JOIN e.eventTags et
+        WHERE e.calendar.user.id = :userId
+            AND e.startTime < :end
+            AND e.endTime > :start 
+            AND e.calendar.id IN :calendarIds
+            AND et.tag.id = :tagId
+    """)
+    public List<Event> findEventsForUserByCalendarIdsAndTagAndDateRange(
+            @Param("userId") UUID userId,
+            @Param("start") Instant start,
+            @Param("end") Instant end,
+            @Param("calendarIds") List<UUID> calendarIds,
+            @Param("tagId") UUID tagId);
+
 }

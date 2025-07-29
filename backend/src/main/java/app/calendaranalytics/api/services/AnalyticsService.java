@@ -1,14 +1,23 @@
 package app.calendaranalytics.api.services;
 
+import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.time.format.TextStyle;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.stereotype.Service;
 
+import app.calendaranalytics.api.dtos.AnalyticsDataPointDto;
 import app.calendaranalytics.api.dtos.SummaryResponseDto;
+import app.calendaranalytics.api.entities.Event;
 import app.calendaranalytics.api.exception.ResourceNotFoundException;
 import app.calendaranalytics.api.repositories.EventRepository;
 import app.calendaranalytics.api.repositories.UserRepository;
@@ -46,8 +55,9 @@ public class AnalyticsService {
      * @param tagId The tag id used to search for events.
      * @return A SummaryResponseDto with the total number of minutes and events.
      */
-    public SummaryResponseDto getSummary(UUID userId, LocalDate start, LocalDate end,
-            List<UUID> calendarIds, UUID tagId) {
+    public SummaryResponseDto getSummary(UUID userId, LocalDate start,
+            LocalDate end, List<UUID> calendarIds, UUID tagId) {
+        // Validate userId
         userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                 "User not found: " + userId));
@@ -63,5 +73,110 @@ public class AnalyticsService {
         summary.setTotalMinutes(totalMinutes == null ? 0 : totalMinutes);
         summary.setTotalEvents(totalEvents == null ? 0 : totalEvents);
         return summary;
+    }
+
+    /**
+     * Retrieves all the events based on a userId, start and end date,
+     * calendarIds, and tagIds and returns a breakdown of the events by period
+     * and the number of minutes for that period. Each period is based on the
+     * range (e.g. a week is broken down into each day).
+     *
+     * @param userId The related user id to retrieve event analytics for.
+     * @param start Start date filter.
+     * @param end End date filter.
+     * @param calendarIds The calendar ids to search for events.
+     * @param tagId The tag id used to search for events.
+     * @return An AnalyticsDataPointDto with the total number of minutes for
+     * each category depending on the range.
+     */
+    public List<AnalyticsDataPointDto> getBreakdown(UUID userId, String range,
+            LocalDate date, List<UUID> calendarIds, UUID tagId) {
+        // Validate userId
+        userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                "User not found: " + userId));
+        DateRange dateRange = calculateDateRange(date, range);
+        List<Event> events = eventRepository
+                .findEventsForUserByCalendarIdsAndTagAndDateRange(userId,
+                        dateRange.start, dateRange.end, calendarIds, tagId);
+        return convertToAnalyticsDataPointDto(events, range);
+    }
+
+    /**
+     * Converts a list of events into a a list of AnalyticsDataPointDto.
+     *
+     * @param events A list of events within a range.
+     * @param range The range for the breakdown. Currently accepts only week.
+     * Day, month, and year is not yet implemented.
+     * @return An AnalyticsDataPointDto with the total number of minutes for
+     * each category depending on the range.
+     */
+    private List<AnalyticsDataPointDto> convertToAnalyticsDataPointDto(
+            List<Event> events, String range) {
+        switch (range) {
+            case "week" -> {
+                Map<DayOfWeek, Long> minutesPerDay = events.stream()
+                        .collect(Collectors.groupingBy(
+                                // For each event, use the day of the week as
+                                // the grouping key
+                                event -> event.getStartTime().atZone(ZoneOffset.UTC)
+                                        .getDayOfWeek(),
+                                // For all events in the same day, sum their
+                                // duration in minutes
+                                Collectors.summingLong(event
+                                        -> (long) event.getDurationInMinutes())
+                        ));
+                List<AnalyticsDataPointDto> result
+                        = // Explicitly list each day of the week in case 
+                        // the minutesPerDay Map is missing a few days as keys
+                        Stream.of(DayOfWeek.SUNDAY,
+                                DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY,
+                                DayOfWeek.THURSDAY, DayOfWeek.FRIDAY, DayOfWeek.SATURDAY)
+                                // For each day, create an AnalyticsDataPointDto
+                                .map(day -> new AnalyticsDataPointDto(
+                                day.getDisplayName(TextStyle.SHORT, Locale.US),
+                                minutesPerDay.getOrDefault(day, 0L)
+                        ))
+                                .collect(Collectors.toList());
+                return result;
+            }
+            default ->
+                throw new IllegalArgumentException(range + " is not a valid range.");
+        }
+    }
+
+    /**
+     * Represents a range of time.
+     *
+     * @param start the start timestamp of the range
+     * @param end the end timestamp of the range
+     */
+    private record DateRange(Instant start, Instant end) {
+
+    }
+
+    /**
+     * Given a date and range, calculates the start and end date.
+     *
+     * @param date A date within a range.
+     * @param range A time period e.g. week.
+     * @return A DateRange which contains a start and end date.
+     */
+    private DateRange calculateDateRange(LocalDate date, String range) {
+        Instant start, end;
+        switch (range) {
+            case "week" -> {
+                LocalDate startOfWeek = date.with(TemporalAdjusters
+                        .previousOrSame(DayOfWeek.SUNDAY));
+                LocalDate endOfWeek = date.with(TemporalAdjusters
+                        .nextOrSame(DayOfWeek.SATURDAY));
+                start = startOfWeek.atStartOfDay(ZoneOffset.UTC).toInstant();
+                end = endOfWeek.plusDays(1).atStartOfDay(ZoneOffset.UTC)
+                        .toInstant();
+            }
+            default ->
+                throw new IllegalArgumentException("Invalid range specified");
+        }
+        return new DateRange(start, end);
     }
 }
