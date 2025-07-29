@@ -3,6 +3,7 @@ package app.calendaranalytics.api.services;
 import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.Month;
 import java.time.ZoneOffset;
 import java.time.format.TextStyle;
 import java.time.temporal.TemporalAdjusters;
@@ -157,6 +158,22 @@ public class AnalyticsService {
                                 .collect(Collectors.toList());
                 return result;
             }
+            case "year" -> {
+                Map<Month, Long> minutesPerMonth = events.stream()
+                        .collect(Collectors.groupingBy(
+                                event -> event.getStartTime().atZone(ZoneOffset.UTC)
+                                        .getMonth(), Collectors.summingLong(event
+                                        -> (long) event.getDurationInMinutes())
+                        ));
+                List<AnalyticsDataPointDto> result
+                        = Stream.of(Month.values())
+                                .map(month -> new AnalyticsDataPointDto(
+                                month.getDisplayName(TextStyle.SHORT, Locale.US),
+                                minutesPerMonth.getOrDefault(month, 0L)
+                        ))
+                                .collect(Collectors.toList());
+                return result;
+            }
             default ->
                 throw new IllegalArgumentException(range + " is not a valid range.");
         }
@@ -197,7 +214,18 @@ public class AnalyticsService {
                 LocalDate endOfMonth = date.with(TemporalAdjusters
                         .lastDayOfMonth());
                 Instant start = startOfMonth.atStartOfDay(ZoneOffset.UTC).toInstant();
-                Instant end = endOfMonth.plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant();
+                Instant end = endOfMonth.plusDays(1).atStartOfDay(ZoneOffset.UTC)
+                        .toInstant();
+                yield new DateRange(start, end);
+            }
+            case "year" -> {
+                LocalDate startOfYear = date.with(TemporalAdjusters
+                        .firstDayOfYear());
+                LocalDate endOfYear = date.with(TemporalAdjusters
+                        .lastDayOfYear());
+                Instant start = startOfYear.atStartOfDay(ZoneOffset.UTC).toInstant();
+                Instant end = endOfYear.plusDays(1).atStartOfDay(ZoneOffset.UTC)
+                        .toInstant();
                 yield new DateRange(start, end);
             }
             default ->
