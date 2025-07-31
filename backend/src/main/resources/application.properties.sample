@@ -5,3 +5,4 @@ spring.datasource.password=your-db-password
 supabase.jwt.secret=your-jwt-secret
 google.client.id=your-google-client-id
 google.client.secret=your-google-client-secret
+app.encryption.key=your-secret-key

@@ -36,10 +36,9 @@ public class CalendarService {
     // A Spring-managed Bean that provides data access methods for the Calendar
     // entity.
     private final CalendarRepository calendarRepository;
-
     private final GoogleCalendarService googleCalendarService;
-
     private final EventRepository eventRepository;
+    private final EncryptionService encryptionService;
 
     /**
      * Constructs the CalendarService with its dependencies.
@@ -50,15 +49,18 @@ public class CalendarService {
      * @param googleCalendarService Contains business logic related to the
      * Google Calendar API.
      * @param eventRepository The repository responsible for Event data access.
+     * @param encryptionService Encrypts and decrypts keys.
      */
     public CalendarService(UserRepository userRepository,
             CalendarRepository calendarRepository,
             GoogleCalendarService googleCalendarService,
-            EventRepository eventRepository) {
+            EventRepository eventRepository,
+            EncryptionService encryptionService) {
         this.userRepository = userRepository;
         this.calendarRepository = calendarRepository;
         this.googleCalendarService = googleCalendarService;
         this.eventRepository = eventRepository;
+        this.encryptionService = encryptionService;
     }
 
     /**
@@ -125,11 +127,12 @@ public class CalendarService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                 "User not found: " + userId));
-        String refreshToken = user.getGoogleRefreshToken();
-        if (refreshToken == null || refreshToken.isBlank()) {
+        String encryptedRefreshToken = user.getGoogleRefreshToken();
+        if (encryptedRefreshToken == null || encryptedRefreshToken.isBlank()) {
             throw new ResourceNotFoundException("User's refresh token not "
                     + "found.");
         }
+        String refreshToken = encryptionService.decrypt(encryptedRefreshToken);
         List<CalendarListEntry> googleCalendars = googleCalendarService
                 .getUserCalendars(refreshToken);
         for (CalendarListEntry googleCalendar : googleCalendars) {
@@ -169,11 +172,12 @@ public class CalendarService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                 "User not found: " + userId));
-        String refreshToken = user.getGoogleRefreshToken();
-        if (refreshToken == null || refreshToken.isBlank()) {
+        String encryptedRefreshToken = user.getGoogleRefreshToken();
+        if (encryptedRefreshToken == null || encryptedRefreshToken.isBlank()) {
             throw new ResourceNotFoundException("User's refresh token not "
                     + "found.");
         }
+        String refreshToken = encryptionService.decrypt(encryptedRefreshToken);
         Calendar calendar = calendarRepository.findByIdAndUserId(calendarId,
                 userId).orElseThrow(() -> new ResourceNotFoundException(
                 "Calendar not found with id: " + calendarId));

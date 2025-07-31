@@ -24,31 +24,38 @@ public class GoogleCalendarService {
 
     private final String clientId;
     private final String clientSecret;
+    private final EncryptionService encryptionService;
 
     /**
-     * Initializes Google Cloud's clientId and clientSecret.
+     * Initializes Google Cloud's clientId and clientSecret constructs a
+     * GoogleCalendarService with a dependency on EncryptionService.
      *
      * @param clientId Google Cloud's OAuth 2.0 Client Id
      * @param clientSecret Google Cloud's OAuth 2.0 Client Secret
+     * @param encryptionService Encrypts and decrypts keys.
      */
     public GoogleCalendarService(
             @Value("${google.client.id}") String clientId,
-            @Value("${google.client.secret}") String clientSecret
+            @Value("${google.client.secret}") String clientSecret,
+            EncryptionService encryptionService
     ) {
         this.clientId = clientId;
         this.clientSecret = clientSecret;
+        this.encryptionService = encryptionService;
     }
 
     /**
      * Retrieves the list of calendars for a user.
      *
-     * @param refreshToken The Google refresh token used to generate an access
-     * token.
+     * @param encryptedRefreshToken The encrypted Google refresh token used to
+     * generate an access token.
      * @return A list of CalendarListEntry, which contains the Google Calendar's
      * metadata.
      * @throws IOException If Google Auth library fails to refresh token.
      */
-    public List<CalendarListEntry> getUserCalendars(String refreshToken) throws IOException {
+    public List<CalendarListEntry> getUserCalendars(String encryptedRefreshToken)
+            throws IOException {
+        String refreshToken = encryptionService.decrypt(encryptedRefreshToken);
         Calendar client = buildCalendarClient(refreshToken);
         return client.calendarList().list().execute().getItems();
     }
