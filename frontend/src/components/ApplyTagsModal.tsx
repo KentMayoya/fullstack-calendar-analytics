@@ -87,8 +87,9 @@ const ApplyTagsModal = ({
           fontWeight: "bold",
         }}
       >
-        Modify Tags for {title}
+        Modify Tags
       </Typography>
+      <Typography>{title}</Typography>
       <Box sx={{ p: 1 }}>
         {isLoadingSelectedTags ? (
           <CircularProgress />

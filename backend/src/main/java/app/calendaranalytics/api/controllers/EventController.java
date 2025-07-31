@@ -33,7 +33,7 @@ public class EventController {
     /**
      * Constructs the EventController with a dependency on the EventService.
      *
-     * @param userService The service managing event-related business logic.
+     * @param eventService The service managing event-related business logic.
      */
     public EventController(EventService eventService) {
         this.eventService = eventService;

@@ -253,7 +253,11 @@ const SettingsPage = () => {
       >
         Tag Management
       </Typography>
-      {isLoadingTags && <CircularProgress />}
+      {isLoadingTags && (
+        <Box>
+          <CircularProgress />
+        </Box>
+      )}
       {!isLoadingTags && (
         <List>
           {tags.map((tag) => (

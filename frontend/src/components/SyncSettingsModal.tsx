@@ -11,22 +11,23 @@ import {
   useCalendar,
   toggleIdInSet,
 } from "../setup/app-context-manager/CalendarContext";
-import { useNavigate } from "react-router-dom";
 import { useUser } from "../setup/app-context-manager/UserContext";
 import ReusableModal from "./ReusableModal";
 
 type SyncSettingsModalProps = {
   handleClose: () => void;
+  handleGoToSettings: () => void;
 };
 
-const SyncSettingsModal = ({ handleClose }: SyncSettingsModalProps) => {
+const SyncSettingsModal = ({
+  handleClose,
+  handleGoToSettings,
+}: SyncSettingsModalProps) => {
   const { session } = useUser();
 
   // calendars contains a list of Calendars' id, name, and isSynced
   // loading is true if the calendars are still being fetched. Otherwise, false
   const { syncedCalendars, loading } = useCalendar();
-
-  const navigate = useNavigate();
 
   // A local copy of selectedIds that contain the ids of the calendars
   // the user wishes to sync.
@@ -70,12 +71,6 @@ const SyncSettingsModal = ({ handleClose }: SyncSettingsModalProps) => {
   // checkboxes. Syncs the ids in selectedIds.
   const handleSelectionChange = (calendarId: string) => {
     setSelectedIds((prev) => toggleIdInSet(prev, calendarId));
-  };
-
-  // Closes the Modal and redirects the user to /settings
-  const handleGoToSettings = () => {
-    handleClose();
-    navigate("/settings");
   };
 
   return (

@@ -17,9 +17,13 @@ import {
 
 type DisplaySettingsModalProps = {
   handleClose: () => void;
+  handleGoToSettings: () => void;
 };
 
-const DisplaySettingsModal = ({ handleClose }: DisplaySettingsModalProps) => {
+const DisplaySettingsModal = ({
+  handleClose,
+  handleGoToSettings,
+}: DisplaySettingsModalProps) => {
   const {
     syncedCalendars,
     loading,
@@ -118,7 +122,11 @@ const DisplaySettingsModal = ({ handleClose }: DisplaySettingsModalProps) => {
                 Save
               </Button>
             ) : (
-              <Button variant="contained" color="primary">
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleGoToSettings}
+              >
                 Settings
               </Button>
             )}

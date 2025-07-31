@@ -83,7 +83,7 @@ public class GoogleCalendarService {
     /**
      * Returns a list of Events that have been modified since the last sync. If
      * this is the first time the calendar is being synced, only the events
-     * modified in the last year will be retrieved.
+     * modified in the last month (30 days) will be retrieved.
      *
      * @param refreshToken The Google refresh token used to generate an access
      * token.
@@ -106,8 +106,8 @@ public class GoogleCalendarService {
             if (lastSyncedAt != null) {
                 request.setUpdatedMin(new DateTime(lastSyncedAt.toEpochMilli()));
             } else {
-                Instant oneYearAgo = Instant.now().minus(365, ChronoUnit.DAYS);
-                request.setTimeMin(new DateTime(oneYearAgo.toEpochMilli()));
+                Instant oneMonthAgo = Instant.now().minus(30, ChronoUnit.DAYS);
+                request.setTimeMin(new DateTime(oneMonthAgo.toEpochMilli()));
             }
             Events eventsPage = request.execute();
             List<Event> eventItems = eventsPage.getItems();

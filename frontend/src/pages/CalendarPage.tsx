@@ -48,14 +48,14 @@ const CalendarPage = () => {
       try {
         const start = viewInfo.start.toISOString();
         const end = viewInfo.end.toISOString();
-        const response = await fetch(
-          `${API_BASE_URL}/api/v1/events?start=${start}&end=${end}&calendarIds=${calendarIds}`,
-          {
-            headers: {
-              Authorization: `Bearer ${session.access_token}`,
-            },
-          }
-        );
+        const url =
+          `${API_BASE_URL}/api/v1/events?start=${start}&end=${end}` +
+          `&calendarIds=${calendarIds}`;
+        const response = await fetch(url, {
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+          },
+        });
         const data = await response.json();
         // Map the data to the format FullCalendar expects
         interface ApiEvent {

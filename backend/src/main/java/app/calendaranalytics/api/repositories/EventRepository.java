@@ -72,4 +72,91 @@ public interface EventRepository extends JpaRepository<Event, UUID> {
     """)
     public Optional<Event> findByUserIdAndId(@Param("userId") UUID userId,
             @Param("eventId") UUID eventId);
+
+    /**
+     * Retrieves the total number of minutes for the events specified by the
+     * passed filters.
+     *
+     * @param userId The related user id to retrieve event analytics for.
+     * @param start Start date filter.
+     * @param end End date filter.
+     * @param calendarIds The calendar ids to search for events.
+     * @param tagId The tag id used to search for events.
+     * @return The sum of the found events' duration.
+     */
+    @Query("""
+        SELECT SUM(e.durationInMinutes) 
+        FROM Event e 
+            JOIN e.eventTags et
+        WHERE e.calendar.user.id = :userId
+            AND e.startTime < :end
+            AND e.endTime > :start
+            AND e.calendar.id IN :calendarIds
+            AND et.tag.id = :tagId
+    """)
+    public Long sumDurationForUserFilteredByTag(
+            @Param("userId") UUID userId,
+            @Param("start") Instant start,
+            @Param("end") Instant end,
+            @Param("calendarIds") List<UUID> calendarIds,
+            @Param("tagId") UUID tagId
+    );
+
+    /**
+     * Retrieves the total number of events by the passed filters.
+     *
+     * @param userId The related user id to retrieve event analytics for.
+     * @param start Start date filter.
+     * @param end End date filter.
+     * @param calendarIds The calendar ids to search for events.
+     * @param tagId The tag id used to search for events.
+     * @return The number of found events.
+     */
+    @Query("""
+        SELECT COUNT(e) 
+        FROM Event e 
+            JOIN e.eventTags et
+        WHERE e.calendar.user.id = :userId
+            AND e.startTime < :end
+            AND e.endTime > :start
+            AND e.calendar.id IN :calendarIds
+            AND et.tag.id = :tagId
+    """)
+    public Long countEventsForUserFilteredByTag(
+            @Param("userId") UUID userId,
+            @Param("start") Instant start,
+            @Param("end") Instant end,
+            @Param("calendarIds") List<UUID> calendarIds,
+            @Param("tagId") UUID tagId
+    );
+
+    /**
+     * Queries for a list of events that belong to the specified user, within
+     * the date range start and end, are related to the specified calendarIds
+     * and tagId.
+     *
+     * @param userId The related user id to retrieve event analytics for.
+     * @param start Start date filter.
+     * @param end End date filter.
+     * @param calendarIds The calendar ids to search for events.
+     * @param tagId The tag id used to search for events.
+     * @return A list of events found based on the passed filters.
+     */
+    @Query("""
+        SELECT e
+        FROM Event e
+            JOIN e.eventTags et
+        WHERE e.calendar.user.id = :userId
+            AND e.startTime < :end
+            AND e.endTime > :start 
+            AND e.calendar.id IN :calendarIds
+            AND et.tag.id = :tagId
+    """)
+    public List<Event> findEventsForUserByCalendarIdsAndTagAndDateRange(
+            @Param("userId") UUID userId,
+            @Param("start") Instant start,
+            @Param("end") Instant end,
+            @Param("calendarIds") List<UUID> calendarIds,
+            @Param("tagId") UUID tagId);
+
 }

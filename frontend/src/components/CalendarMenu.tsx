@@ -5,6 +5,7 @@ import { useMenu } from "../hooks/useMenu";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import SyncSettingsModal from "./SyncSettingsModal";
 import DisplaySettingsModal from "./DisplaySettingsModal";
+import { useNavigate } from "react-router-dom";
 
 const UserMenu = () => {
   const { anchorEl, open, handleOpen, handleClose } = useMenu();
@@ -26,6 +27,14 @@ const UserMenu = () => {
 
   const closeDisplayModal = () => {
     setIsDisplayModalOpen(false);
+  };
+
+  const navigate = useNavigate();
+
+  // Closes the Modal and redirects the user to /settings
+  const handleGoToSettings = () => {
+    handleClose();
+    navigate("/settings");
   };
 
   const menuItems = [
@@ -60,9 +69,17 @@ const UserMenu = () => {
         onClose={handleClose}
         menuItems={menuItems}
       />
-      {isSyncModalOpen && <SyncSettingsModal handleClose={closeSyncModal} />}
+      {isSyncModalOpen && (
+        <SyncSettingsModal
+          handleClose={closeSyncModal}
+          handleGoToSettings={handleGoToSettings}
+        />
+      )}
       {isDisplayModalOpen && (
-        <DisplaySettingsModal handleClose={closeDisplayModal} />
+        <DisplaySettingsModal
+          handleClose={closeDisplayModal}
+          handleGoToSettings={handleGoToSettings}
+        />
       )}
     </>
   );
