@@ -19,14 +19,19 @@ public class UserService {
 
     // A Spring-managed Bean that provides data access methods for the User entity.
     private final UserRepository userRepository;
+    private final EncryptionService encryptionService;
 
     /**
-     * Constructs the UserService with a dependency on the UserRepository.
+     * Constructs the UserService with a dependency on the UserRepository and
+     * EncryptionService.
      *
      * @param userRepository The repository responsible for user data access.
+     * @param encryptionService Encrypts and decrypts keys.
      */
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository,
+            EncryptionService encryptionService) {
         this.userRepository = userRepository;
+        this.encryptionService = encryptionService;
     }
 
     /**
@@ -55,17 +60,19 @@ public class UserService {
     }
 
     /**
-     * Stores a refresh token for the specified user in the database.
+     * Encrypts the refresh token and stores it in the database for the
+     * specified user.
      *
      * @param userId The user id to query for.
-     * @param refreshToken The refresh token to store.
+     * @param refreshToken The refresh token to encrypted before storing.
      */
     @Transactional
     public void saveRefreshToken(UUID userId, String refreshToken) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                 "User not found with id: " + userId));
-        user.setGoogleRefreshToken(refreshToken);
+        String encryptedToken = encryptionService.encrypt(refreshToken);
+        user.setGoogleRefreshToken(encryptedToken);
         user.setGoogleTokenSaved(true);
         userRepository.save(user);
     }
