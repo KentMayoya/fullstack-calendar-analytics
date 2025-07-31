@@ -23,7 +23,7 @@ import { useUser } from "../setup/app-context-manager/UserContext";
 import { Box, Typography, Paper } from "@mui/material";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import EventIcon from "@mui/icons-material/Event";
-import WeeklyBarChart from "../components/graphs/WeeklyBarChart";
+import BreakdownBarChart from "../components/BreakdownBarChart";
 
 interface SummaryData {
   totalMinutes: number;
@@ -237,7 +237,7 @@ const DashboardPage = () => {
             fontWeight="bold"
             gutterBottom
           >
-            Summary
+            {breakdownTitle} Summary
           </Typography>
           <Box sx={{ display: "flex", mb: 1 }}>
             <AccessTimeIcon sx={{ mr: 1 }} />
@@ -267,7 +267,7 @@ const DashboardPage = () => {
             >
               {breakdownTitle} Breakdown
             </Typography>
-            <WeeklyBarChart data={breakdownData} />
+            <BreakdownBarChart data={breakdownData} />
           </Paper>
         )}
       </Box>
