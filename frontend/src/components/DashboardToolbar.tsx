@@ -122,7 +122,7 @@ const DashboardToolbar = ({
           options={syncedCalendars}
           getOptionLabel={(option) => option.name}
           value={selectedCalendars}
-          onChange={(event, newValue) => {
+          onChange={(_event, newValue) => {
             setSelectedCalendars(newValue);
           }}
           isOptionEqualToValue={(option, value) => option.id === value.id}
@@ -137,7 +137,7 @@ const DashboardToolbar = ({
           options={tags}
           getOptionLabel={(option) => option.name}
           value={selectedTag}
-          onChange={(event, newValue) => {
+          onChange={(_event, newValue) => {
             setSelectedTag(newValue);
           }}
           isOptionEqualToValue={(option, value) => option.id === value.id}

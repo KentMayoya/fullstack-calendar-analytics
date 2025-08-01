@@ -23,12 +23,7 @@ import { useTags } from "../hooks/useTags";
 
 const SettingsPage = () => {
   const { session } = useUser();
-  const {
-    tags,
-    fetchTags,
-    isLoading: isLoadingTags,
-    error: tagError,
-  } = useTags();
+  const { tags, fetchTags, isLoading: isLoadingTags } = useTags();
 
   // Used when fetching calendars from Google Calendar
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
