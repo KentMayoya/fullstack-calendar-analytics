@@ -47,15 +47,14 @@ public class GoogleCalendarService {
     /**
      * Retrieves the list of calendars for a user.
      *
-     * @param encryptedRefreshToken The encrypted Google refresh token used to
-     * generate an access token.
+     * @param refreshToken The decrypted Google refresh token used to generate
+     * an access token.
      * @return A list of CalendarListEntry, which contains the Google Calendar's
      * metadata.
      * @throws IOException If Google Auth library fails to refresh token.
      */
-    public List<CalendarListEntry> getUserCalendars(String encryptedRefreshToken)
+    public List<CalendarListEntry> getUserCalendars(String refreshToken)
             throws IOException {
-        String refreshToken = encryptionService.decrypt(encryptedRefreshToken);
         Calendar client = buildCalendarClient(refreshToken);
         return client.calendarList().list().execute().getItems();
     }
