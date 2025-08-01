@@ -99,7 +99,7 @@ const ApplyTagsModal = ({
             options={allTags}
             getOptionLabel={(option) => option.name}
             value={selectedTags}
-            onChange={(event, newValue) => {
+            onChange={(_event, newValue) => {
               setSelectedTags(newValue);
             }}
             isOptionEqualToValue={(option, value) => option.id === value.id}

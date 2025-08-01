@@ -53,7 +53,7 @@ const DashboardToolbar = ({
 
   // Updates the view state when a new view is selected
   const handleViewChange = (
-    event: React.MouseEvent<HTMLElement>,
+    _event: React.MouseEvent<HTMLElement>,
     newView: string | null
   ) => {
     if (newView !== null) {
