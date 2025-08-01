@@ -47,4 +47,12 @@ public interface CalendarRepository extends JpaRepository<Calendar, UUID> {
      */
     @Transactional
     Optional<Calendar> findByGoogleCalendarIdAndUserId(String googleCalendarId, UUID userId);
+
+    /**
+     * Queries for a list of all calendars where isSynced is true. Does not
+     * filter by user.
+     *
+     * @return A list of calendars where isSynced is true.
+     */
+    List<Calendar> findAllByIsSyncedTrue();
 }

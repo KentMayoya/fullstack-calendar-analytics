@@ -306,4 +306,23 @@ public class CalendarService {
         throw new IllegalArgumentException("EventDateTime must contain either "
                 + "a dateTime or date property");
     }
+
+    /**
+     * Syncs the events since the last sync date/time for all users with
+     * calendars that are marked as synced.
+     */
+    public void syncAllCalendarEvents() {
+        List<Calendar> syncedCalendars = calendarRepository
+                .findAllByIsSyncedTrue();
+        for (Calendar calendar : syncedCalendars) {
+            try {
+                syncCalendarEvents(calendar.getUser().getId(),
+                        calendar.getId());
+            } catch (IOException ex) {
+                System.err.println("Failed to sync calendar " + calendar.getId()
+                        + " for user " + calendar.getUser().getId() + ": "
+                        + ex.getMessage());
+            }
+        }
+    }
 }
