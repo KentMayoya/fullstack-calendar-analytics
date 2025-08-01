@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import app.calendaranalytics.api.dtos.CalendarDto;
-import app.calendaranalytics.api.dtos.SyncAllCalendarsRequestDto;
 import app.calendaranalytics.api.dtos.UpdateCalendarDto;
 import app.calendaranalytics.api.exception.ResourceNotFoundException;
 import app.calendaranalytics.api.services.CalendarService;
