@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -128,15 +129,13 @@ public class CalendarController {
      * calendars that are marked as synced. Requires a secret key to perform the
      * sync.
      *
-     * @param requestDto The request body which contains a secret key.
-     * @throws IllegalArgumentException if the key in the request body is
-     * incorrect.
+     * @param requestKey The secret key to authorize the sync job.
+     * @throws IllegalArgumentException if the key in the is incorrect.
      */
     @PostMapping("/sync-all")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ResponseStatus(HttpStatus.ACCEPTED)
     public void syncAllCalendarEvents(
-            @RequestBody SyncAllCalendarsRequestDto requestDto) {
-        String requestKey = requestDto.getKey();
+            @RequestHeader("X-Cron-Secret") String requestKey) {
         if (!requestKey.equals(this.secretCronKey)) {
             throw new IllegalArgumentException("Invalid key: " + requestKey);
         }
