@@ -40,8 +40,8 @@ const PrivacyPolicyPage = () => {
           <ListItemText
             primary="Google Calendar Data"
             secondary="To provide analytics, we access and store information from
-            your Google Calendars, including calendar metadata and event details.
-            We only access calendar events you explicitly choose to sync."
+            your Google Calendars, including calendar and event details.
+            We only access events from the calendar you explicitly choose to sync."
           />
         </ListItem>
       </List>
@@ -96,9 +96,9 @@ const PrivacyPolicyPage = () => {
         </ListItem>
         <ListItem sx={{ display: "list-item" }}>
           <ListItemText
-            primary="Row Level Security (RLS): We have enabled Row
-          Level Security on our database to ensure that you are the only person
-          who can access your own data through the API."
+            primary="Row Level Security (RLS): We have enabled RLS on our
+            database to ensure that you are the only person who can access
+            your own data through the API."
           />
         </ListItem>
       </List>
