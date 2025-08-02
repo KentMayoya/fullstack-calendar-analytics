@@ -62,7 +62,7 @@ const AboutPage = () => {
         university. Most of the website was created by applying what I have
         learned through the following classes: Database Systems, Web Programming
         & Applications, Multithreading in GUI Applications, and Software
-        Engineering Analysis & Design. I will graduate in June 2026.
+        Engineering Analysis & Design.
       </Typography>
       <Typography>
         <Link
