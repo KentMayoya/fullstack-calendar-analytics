@@ -229,6 +229,14 @@ const DashboardPage = () => {
         selectedTag={selectedTag}
         setSelectedTag={setSelectedTag}
       />
+      {(selectedCalendars.length === 0 || !selectedTag) && (
+        <Paper sx={{ p: 2, backgroundColor: "azure" }}>
+          <Typography>
+            To view your analytics, please select at least one calendar and one
+            tag.
+          </Typography>
+        </Paper>
+      )}
       {summaryData && (
         <Paper sx={{ p: 1, backgroundColor: "azure" }}>
           <Typography
