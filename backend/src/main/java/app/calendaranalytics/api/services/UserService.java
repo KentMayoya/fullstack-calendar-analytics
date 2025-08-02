@@ -64,7 +64,7 @@ public class UserService {
      * specified user.
      *
      * @param userId The user id to query for.
-     * @param refreshToken The refresh token to encrypted before storing.
+     * @param refreshToken The refresh token to encrypt before storing.
      */
     @Transactional
     public void saveRefreshToken(UUID userId, String refreshToken) {
