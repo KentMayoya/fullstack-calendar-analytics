@@ -53,7 +53,11 @@ const SettingsPage = () => {
   // a specified calendar
   const { setCalendars, calendars, loading, handleToggleSync } = useCalendar();
 
+  // Controls the visibility of the Sync Info Dialog
   const [isSyncInfoDialogOpen, setIsSyncInfoDialogOpen] =
+    useState<boolean>(false);
+
+  const [isTagInfoDialogOpen, setIsTagInfoDialogOpen] =
     useState<boolean>(false);
 
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -269,15 +273,36 @@ const SettingsPage = () => {
         Load Calendars
       </Button>
       <Divider sx={{ my: 2 }} />
-      <Typography
-        component="h2"
-        variant="h6"
-        sx={{
-          fontWeight: "bold",
-        }}
+      <Box sx={{ display: "flex", alignItems: "center" }}>
+        <Typography
+          component="h2"
+          variant="h6"
+          sx={{
+            fontWeight: "bold",
+          }}
+        >
+          Tag Management
+        </Typography>
+        <IconButton
+          onClick={() => setIsTagInfoDialogOpen(true)}
+          aria-label="info"
+        >
+          <InfoOutlineIcon />
+        </IconButton>
+      </Box>
+      <Dialog
+        open={isTagInfoDialogOpen}
+        onClose={() => setIsTagInfoDialogOpen(false)}
       >
-        Tag Management
-      </Typography>
+        <DialogTitle>Managing Tags</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Tags allow you to categorize your events. By adding tags to your
+            events, you can view your calendar and tag analytics on the
+            Dashboard page.
+          </Typography>
+        </DialogContent>
+      </Dialog>
       {isLoadingTags && (
         <Box>
           <CircularProgress />
