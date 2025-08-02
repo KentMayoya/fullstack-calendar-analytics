@@ -9,11 +9,16 @@ import {
   Checkbox,
   Box,
   Button,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
 } from "@mui/material";
 import {
   useCalendar,
   toggleIdInSet,
 } from "../setup/app-context-manager/CalendarContext";
+import InfoOutlineIcon from "@mui/icons-material/InfoOutline";
 
 type DisplaySettingsModalProps = {
   handleClose: () => void;
@@ -34,6 +39,9 @@ const DisplaySettingsModal = ({
   // As the user is able to save or cancel their changes, this modal will have
   // a local copy
   const [draftSelectedIds, setDraftSelectedIds] = useState(savedSelectedIds);
+
+  // Controls the visibility of the Info Dialog
+  const [isInfoDialogOpen, setIsInfoDialogOpen] = useState<boolean>(false);
 
   // Saves the selectedIds managed by CalendarContext using the selected Ids
   // in draftSelectedIds
@@ -62,16 +70,38 @@ const DisplaySettingsModal = ({
               <ToggleButton value="list">List</ToggleButton>
             </ToggleButtonGroup>
           </Box>
-          <Typography
-            component="h2"
-            variant="h6"
-            sx={{
-              fontWeight: "bold",
-              mb: 2,
-            }}
+          <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+            <Typography
+              component="h2"
+              variant="h6"
+              sx={{
+                fontWeight: "bold",
+              }}
+            >
+              Displayed Calendars
+            </Typography>
+            <IconButton
+              onClick={() => setIsInfoDialogOpen(true)}
+              aria-label="info"
+            >
+              <InfoOutlineIcon />
+            </IconButton>
+          </Box>
+          <Dialog
+            open={isInfoDialogOpen}
+            onClose={() => setIsInfoDialogOpen(false)}
           >
-            Displayed Calendars
-          </Typography>
+            <DialogTitle>Managing Displayed Calendars</DialogTitle>
+            <DialogContent>
+              <Typography>
+                You can modify the visiblity of your calendars here. Only the
+                calendars marked as syncable under "Calendar Sync Settings" on
+                the Settings page are displayed. Displaying a calendar does not
+                trigger a sync for your calendar events. To sync events, see
+                "Sync Settings".
+              </Typography>
+            </DialogContent>
+          </Dialog>
           <Box
             sx={{
               flexGrow: 1,

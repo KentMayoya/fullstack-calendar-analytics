@@ -10,11 +10,15 @@ import {
   ListItem,
   ListItemText,
   IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
+import InfoOutlineIcon from "@mui/icons-material/InfoOutline";
 import { useUser } from "../setup/app-context-manager/UserContext";
 import { Navigate } from "react-router-dom";
 import { useState } from "react";
@@ -48,6 +52,14 @@ const SettingsPage = () => {
   // handleToggleSync: Updates the database when a user toggles a switch for
   // a specified calendar
   const { setCalendars, calendars, loading, handleToggleSync } = useCalendar();
+
+  // Controls the visibility of the Sync Info Dialog
+  const [isSyncInfoDialogOpen, setIsSyncInfoDialogOpen] =
+    useState<boolean>(false);
+
+  // Controls the visibility of the Tag Info Dialog
+  const [isTagInfoDialogOpen, setIsTagInfoDialogOpen] =
+    useState<boolean>(false);
 
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -201,15 +213,38 @@ const SettingsPage = () => {
         Save
       </Button>
       <Divider sx={{ my: 2 }} />
-      <Typography
-        component="h2"
-        variant="h6"
-        sx={{
-          fontWeight: "bold",
-        }}
+      <Box sx={{ display: "flex", alignItems: "center" }}>
+        <Typography
+          component="h2"
+          variant="h6"
+          sx={{
+            fontWeight: "bold",
+          }}
+        >
+          Calendar Sync Settings
+        </Typography>
+        <IconButton
+          onClick={() => setIsSyncInfoDialogOpen(true)}
+          aria-label="info"
+        >
+          <InfoOutlineIcon />
+        </IconButton>
+      </Box>
+      <Dialog
+        open={isSyncInfoDialogOpen}
+        onClose={() => setIsSyncInfoDialogOpen(false)}
       >
-        Calendar Sync Settings
-      </Typography>
+        <DialogTitle>Managing Calendar Sync</DialogTitle>
+        <DialogContent>
+          <Typography>
+            The "Load Calendars" buttons loads your calendars from Google
+            Calendar. Click on the toggle to change the calendar's sync status.
+            Marking a calendar as syncable schedules an hourly job to sync your
+            events. However, this does not trigger an immediate sync. To
+            manually trigger a sync, view "Sync Settings" on the calendar page.
+          </Typography>
+        </DialogContent>
+      </Dialog>
       {(loading || isSyncing) && (
         <Box>
           <CircularProgress />
@@ -239,15 +274,36 @@ const SettingsPage = () => {
         Load Calendars
       </Button>
       <Divider sx={{ my: 2 }} />
-      <Typography
-        component="h2"
-        variant="h6"
-        sx={{
-          fontWeight: "bold",
-        }}
+      <Box sx={{ display: "flex", alignItems: "center" }}>
+        <Typography
+          component="h2"
+          variant="h6"
+          sx={{
+            fontWeight: "bold",
+          }}
+        >
+          Tag Management
+        </Typography>
+        <IconButton
+          onClick={() => setIsTagInfoDialogOpen(true)}
+          aria-label="info"
+        >
+          <InfoOutlineIcon />
+        </IconButton>
+      </Box>
+      <Dialog
+        open={isTagInfoDialogOpen}
+        onClose={() => setIsTagInfoDialogOpen(false)}
       >
-        Tag Management
-      </Typography>
+        <DialogTitle>Managing Tags</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Tags allow you to categorize your events. By adding tags to your
+            events, you can view your calendar and tag analytics on the
+            Dashboard page.
+          </Typography>
+        </DialogContent>
+      </Dialog>
       {isLoadingTags && (
         <Box>
           <CircularProgress />
