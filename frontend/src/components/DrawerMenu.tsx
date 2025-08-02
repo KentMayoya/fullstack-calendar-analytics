@@ -10,6 +10,7 @@ type DrawerMenuProps = {
 const menuItems = [
   { text: "Home", path: "/" },
   { text: "About", path: "/about" },
+  { text: "Privacy Policy", path: "/privacy" },
 ];
 
 const authMenuItems = [
