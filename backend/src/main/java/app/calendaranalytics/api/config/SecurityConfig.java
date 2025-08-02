@@ -68,6 +68,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                 // Exposes "/api/test" as a public endpoint.
                 .requestMatchers("/api/test").permitAll()
+                .requestMatchers("/api/v1/calendars/sync-all").permitAll()
                 // All other requests will require authentication.
                 .anyRequest().authenticated()
                 );

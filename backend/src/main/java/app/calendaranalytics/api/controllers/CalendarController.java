@@ -43,7 +43,7 @@ public class CalendarController {
      * logic.
      */
     public CalendarController(CalendarService calendarService,
-            @Value("cron.secret-key") String secretCronKey) {
+            @Value("${cron.secret-key}") String secretCronKey) {
         this.calendarService = calendarService;
         this.secretCronKey = secretCronKey;
     }
