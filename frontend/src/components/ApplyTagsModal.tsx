@@ -5,11 +5,16 @@ import {
   Autocomplete,
   TextField,
   CircularProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  IconButton,
 } from "@mui/material";
 import ReusableModal from "./ReusableModal";
 import { useUser } from "../setup/app-context-manager/UserContext";
 import { useTags, type Tag } from "../hooks/useTags";
 import { useEffect, useState } from "react";
+import InfoOutlineIcon from "@mui/icons-material/InfoOutline";
 
 type ApplyTagsModalProps = {
   eventId: string | undefined;
@@ -28,6 +33,9 @@ const ApplyTagsModal = ({
   const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
   const [isLoadingSelectedTags, setIsLoadingSelectedTags] =
     useState<boolean>(true);
+
+  // Controls the visibility of the Info Dialog
+  const [isInfoDialogOpen, setIsInfoDialogOpen] = useState<boolean>(false);
 
   // Loads all the tags related to the specific eventId
   useEffect(() => {
@@ -80,15 +88,34 @@ const ApplyTagsModal = ({
 
   return (
     <ReusableModal isOpen={true} handleClose={handleClose}>
-      <Typography
-        component="h2"
-        variant="h6"
-        sx={{
-          fontWeight: "bold",
-        }}
+      <Box sx={{ display: "flex", alignItems: "center" }}>
+        <Typography
+          component="h2"
+          variant="h6"
+          sx={{
+            fontWeight: "bold",
+          }}
+        >
+          Modify Tags
+        </Typography>
+        <IconButton onClick={() => setIsInfoDialogOpen(true)} aria-label="info">
+          <InfoOutlineIcon />
+        </IconButton>
+      </Box>
+      <Dialog
+        open={isInfoDialogOpen}
+        onClose={() => setIsInfoDialogOpen(false)}
       >
-        Modify Tags
-      </Typography>
+        <DialogTitle>Adding Tags To Events</DialogTitle>
+        <DialogContent>
+          <Typography>
+            You can add your existing tags to your event here. By adding tags to
+            your events, you can view your calendar and tag analytics on the
+            Dashboard page. To add additional tags, visit the "Tag Management"
+            section on the Settings page.
+          </Typography>
+        </DialogContent>
+      </Dialog>
       <Typography>{title}</Typography>
       <Box sx={{ p: 1 }}>
         {isLoadingSelectedTags ? (

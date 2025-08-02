@@ -22,7 +22,7 @@ function BackendMessage() {
   return (
     <div className="card">
       <p>
-        Message from backend: <strong>{message || "Loading..."}</strong>
+        Backend Status: <strong>{message || "No connection."}</strong>
       </p>
     </div>
   );

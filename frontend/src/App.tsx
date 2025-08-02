@@ -7,6 +7,7 @@ import DashboardPage from "./pages/DashboardPage";
 import { Toolbar } from "@mui/material";
 import SettingsPage from "./pages/SettingsPage";
 import { CalendarContextProvider } from "./setup/app-context-manager/CalendarContext";
+import AboutPage from "./pages/AboutPage";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
       <main>
         <Routes>
           <Route path="/" element={<HomePage />} />
+          <Route path="/about" element={<AboutPage />} />
           <Route path="/privacy" element={<PrivacyPolicyPage />} />
           <Route
             path="/calendar"
