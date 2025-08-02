@@ -57,6 +57,7 @@ const SettingsPage = () => {
   const [isSyncInfoDialogOpen, setIsSyncInfoDialogOpen] =
     useState<boolean>(false);
 
+  // Controls the visibility of the Tag Info Dialog
   const [isTagInfoDialogOpen, setIsTagInfoDialogOpen] =
     useState<boolean>(false);
 

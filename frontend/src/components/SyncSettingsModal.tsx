@@ -6,6 +6,10 @@ import {
   Checkbox,
   Button,
   CircularProgress,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
 } from "@mui/material";
 import {
   useCalendar,
@@ -13,6 +17,7 @@ import {
 } from "../setup/app-context-manager/CalendarContext";
 import { useUser } from "../setup/app-context-manager/UserContext";
 import ReusableModal from "./ReusableModal";
+import InfoOutlineIcon from "@mui/icons-material/InfoOutline";
 
 type SyncSettingsModalProps = {
   handleClose: () => void;
@@ -32,6 +37,9 @@ const SyncSettingsModal = ({
   // A local copy of selectedIds that contain the ids of the calendars
   // the user wishes to sync.
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  // Controls the visibility of the Info Dialog
+  const [isInfoDialogOpen, setIsInfoDialogOpen] = useState<boolean>(false);
 
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -77,16 +85,39 @@ const SyncSettingsModal = ({
     <ReusableModal isOpen={true} handleClose={handleClose}>
       {!loading && (
         <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
-          <Typography
-            component="h2"
-            variant="h6"
-            sx={{
-              fontWeight: "bold",
-              mb: 2,
-            }}
+          <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+            <Typography
+              component="h2"
+              variant="h6"
+              sx={{
+                fontWeight: "bold",
+              }}
+            >
+              My Calendars
+            </Typography>
+            <IconButton
+              onClick={() => setIsInfoDialogOpen(true)}
+              aria-label="info"
+            >
+              <InfoOutlineIcon />
+            </IconButton>
+          </Box>
+          <Dialog
+            open={isInfoDialogOpen}
+            onClose={() => setIsInfoDialogOpen(false)}
           >
-            My Calendars
-          </Typography>
+            <DialogTitle>Syncing Calendars</DialogTitle>
+            <DialogContent>
+              <Typography>
+                You can select which calendars to sync here. Only the calendars
+                marked as syncable under "Calendar Sync Settings" on the
+                Settings page are displayed. Calendar events that were created,
+                modified, or deleted within the last 30 days are synced. Syncing
+                a calendar does not automatically display the calendar event's
+                visibility. To modify visibility, see "Display Settings".
+              </Typography>
+            </DialogContent>
+          </Dialog>
           <Box
             sx={{
               flexGrow: 1,
