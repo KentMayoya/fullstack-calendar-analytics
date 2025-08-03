@@ -1,4 +1,4 @@
-import { Box, Typography } from "@mui/material";
+import { Box, Divider, Typography } from "@mui/material";
 const HomePage = () => {
   return (
     <>
@@ -76,6 +76,11 @@ const HomePage = () => {
           No downloads or installations required. This app runs entirely in your
           browser and is designed for mobile devices. Just open the website on
           your phone and start analyzing your calendar.
+        </Typography>
+        <Divider sx={{ my: 2 }} />
+        <Typography variant="body2" color="text.secondary">
+          Google Calendar™ is a trademark of Google LLC. This application is not
+          affiliated with or endorsed by Google LLC.
         </Typography>
       </Box>
     </>
