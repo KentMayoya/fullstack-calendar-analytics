@@ -325,4 +325,21 @@ public class CalendarService {
             }
         }
     }
+
+    /**
+     * Deletes all Events related to the specified user and calendar.
+     *
+     * @param userId The user to search for a matching calendar.
+     * @param calendarId The calendar Id to delete related events.
+     * @throws ResourceNotFoundException If the calendarId is not valid, or does
+     * not belong to the userId.
+     */
+    @Transactional
+    public void unsyncCalendar(UUID userId, UUID calendarId) {
+        // Validate the calendar belongs to the user
+        calendarRepository.findByIdAndUserId(calendarId,
+                userId).orElseThrow(() -> new ResourceNotFoundException(
+                "Calendar not found with id: " + calendarId));
+        eventRepository.deleteByCalendarId(calendarId);
+    }
 }
