@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,6 +33,7 @@ public class CalendarController {
     // A Spring-managed Bean that provides data access methods for the Calendar
     // entity.
     private final CalendarService calendarService;
+    private final String secretCronKey;
 
     /**
      * Constructs the CalendarController with a dependency on the
@@ -39,8 +42,10 @@ public class CalendarController {
      * @param calendarService The service managing calendar-related business
      * logic.
      */
-    public CalendarController(CalendarService calendarService) {
+    public CalendarController(CalendarService calendarService,
+            @Value("${cron.secret-key}") String secretCronKey) {
         this.calendarService = calendarService;
+        this.secretCronKey = secretCronKey;
     }
 
     /**
@@ -118,4 +123,21 @@ public class CalendarController {
         calendarService.syncCalendarEvents(userId, calendarId);
     }
 
+    /**
+     * Syncs the events since the last sync date/time for all users with
+     * calendars that are marked as synced. Requires a secret key to perform the
+     * sync.
+     *
+     * @param requestKey The secret key to authorize the sync job.
+     * @throws IllegalArgumentException if the key in the is incorrect.
+     */
+    @PostMapping("/sync-all")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public void syncAllCalendarEvents(
+            @RequestHeader("X-Cron-Secret") String requestKey) {
+        if (!requestKey.equals(this.secretCronKey)) {
+            throw new IllegalArgumentException("Invalid key: " + requestKey);
+        }
+        calendarService.syncAllCalendarEvents();
+    }
 }
