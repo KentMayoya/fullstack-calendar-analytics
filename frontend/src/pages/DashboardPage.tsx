@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
+import { Navigate } from "react-router-dom";
 import DashboardToolbar from "../components/DashboardToolbar";
 import {
   startOfYear,
@@ -46,6 +47,11 @@ const DashboardPage = () => {
   const [breakdownData, setBreakdownData] = useState<BreakdownData[] | null>(
     []
   );
+
+  // If the user does not have a valid session, redirect to the home page
+  if (!session?.auth) {
+    return <Navigate to="/" replace />;
+  }
 
   // Sets the date range back by the period specified in view
   const onPrevClick = () => {
