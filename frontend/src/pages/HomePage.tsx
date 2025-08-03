@@ -1,4 +1,5 @@
 import { Box, Divider, Typography } from "@mui/material";
+
 const HomePage = () => {
   return (
     <>

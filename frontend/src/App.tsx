@@ -10,10 +10,12 @@ import { CalendarContextProvider } from "./setup/app-context-manager/CalendarCon
 import AboutPage from "./pages/AboutPage";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 import BackendMessage from "./components/BackendMessage";
+import ScrollToTop from "./components/ScrollToTop";
 
 function App() {
   return (
     <>
+      <ScrollToTop />
       <Header></Header>
       <Toolbar />
       <main>
