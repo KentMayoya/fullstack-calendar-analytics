@@ -9,6 +9,7 @@ import SettingsPage from "./pages/SettingsPage";
 import { CalendarContextProvider } from "./setup/app-context-manager/CalendarContext";
 import AboutPage from "./pages/AboutPage";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
+import BackendMessage from "./components/BackendMessage";
 
 function App() {
   return (
@@ -44,6 +45,7 @@ function App() {
               </CalendarContextProvider>
             }
           />
+          <Route path="/health" element={<BackendMessage />} />
         </Routes>
       </main>
     </>
