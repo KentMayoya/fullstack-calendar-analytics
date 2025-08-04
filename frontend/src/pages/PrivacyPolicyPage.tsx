@@ -9,7 +9,7 @@ import {
 
 const PrivacyPolicyPage = () => {
   return (
-    <Container sx={{ py: 4 }}>
+    <Container sx={{ py: 2 }}>
       <Typography variant="h4" component="h1">
         Privacy Policy
       </Typography>
@@ -114,10 +114,16 @@ const PrivacyPolicyPage = () => {
       <Typography variant="h5" component="h2" gutterBottom sx={{ mt: 4 }}>
         5. Your Rights and Data Deletion
       </Typography>
-      <Typography>
+      <Typography gutterBottom>
         You can revoke our access to your Google Account at any time from your
-        Google Account security settings page. You can delete your account and
-        all associated data by contacting us at kentmay@uw.edu.
+        Google Account security settings page.
+      </Typography>
+      <Typography>
+        You can permanently delete your Calendar Analytics account and all of
+        your associated data directly within the application. This action can be
+        found on the "Account Management" section of the Settings page. This
+        will remove your profile, all calendars, events, and tags from our
+        database.
       </Typography>
       <Typography variant="h5" component="h2" gutterBottom sx={{ mt: 4 }}>
         6. Changes to This Privacy Policy

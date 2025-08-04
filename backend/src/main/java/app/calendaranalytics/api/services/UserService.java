@@ -17,9 +17,9 @@ import jakarta.transaction.Transactional;
 @Service
 public class UserService {
 
-    // A Spring-managed Bean that provides data access methods for the User entity.
     private final UserRepository userRepository;
     private final EncryptionService encryptionService;
+    private final SupabaseAdminService supabaseAdminService;
 
     /**
      * Constructs the UserService with a dependency on the UserRepository and
@@ -29,9 +29,11 @@ public class UserService {
      * @param encryptionService Encrypts and decrypts keys.
      */
     public UserService(UserRepository userRepository,
-            EncryptionService encryptionService) {
+            EncryptionService encryptionService,
+            SupabaseAdminService supabaseAdminService) {
         this.userRepository = userRepository;
         this.encryptionService = encryptionService;
+        this.supabaseAdminService = supabaseAdminService;
     }
 
     /**
@@ -75,5 +77,19 @@ public class UserService {
         user.setGoogleRefreshToken(encryptedToken);
         user.setGoogleTokenSaved(true);
         userRepository.save(user);
+    }
+
+    /**
+     * Deletes a user's account, including all calendars, events, and tags.
+     *
+     * @param userId The user to delete.
+     * @throws ResourceNotFoundException If the specified userId does not exist.
+     */
+    @Transactional
+    public void deleteUser(UUID userId) {
+        userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                "User not found with id: " + userId));
+        supabaseAdminService.deleteUser(userId);
     }
 }

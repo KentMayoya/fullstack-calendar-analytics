@@ -5,6 +5,7 @@ import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -69,4 +70,18 @@ public class UserController {
         userService.saveRefreshToken(userId, requestDto.getRefreshToken());
     }
 
+    /**
+     * Deletes the current user's account, including all calendars, events, and
+     * tags.
+     *
+     * @param authentication An object provided by the Spring Security
+     * framework. Contains all the information regarding the currently logged-in
+     * user.
+     */
+    @DeleteMapping("/me")
+    @ResponseStatus(HttpStatus.OK)
+    public void deleteUser(Authentication authentication) {
+        UUID userId = UUID.fromString(authentication.getName());
+        userService.deleteUser(userId);
+    }
 }
