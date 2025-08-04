@@ -46,12 +46,10 @@ const SyncSettingsModal = ({
   // Fetches Google Calendar events from the selected calendar checkboxes
   const handleSyncEvents = async () => {
     if (!session?.access_token) {
-      console.log("no access token. returning");
       return;
     }
     const calendarIdsToSync = Array.from(selectedIds);
     for (const calendarId of calendarIdsToSync) {
-      console.log(`starting calendar sync for ${calendarId}`);
       try {
         const response = await fetch(
           `${API_BASE_URL}/api/v1/calendars/${calendarId}/sync`,
@@ -71,7 +69,6 @@ const SyncSettingsModal = ({
         console.error(error);
       }
     }
-    console.log("All selected syncs have been initiated.");
     handleClose();
   };
 

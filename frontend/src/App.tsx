@@ -9,10 +9,13 @@ import SettingsPage from "./pages/SettingsPage";
 import { CalendarContextProvider } from "./setup/app-context-manager/CalendarContext";
 import AboutPage from "./pages/AboutPage";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
+import BackendMessage from "./components/BackendMessage";
+import ScrollToTop from "./components/ScrollToTop";
 
 function App() {
   return (
     <>
+      <ScrollToTop />
       <Header></Header>
       <Toolbar />
       <main>
@@ -44,6 +47,7 @@ function App() {
               </CalendarContextProvider>
             }
           />
+          <Route path="/health" element={<BackendMessage />} />
         </Routes>
       </main>
     </>

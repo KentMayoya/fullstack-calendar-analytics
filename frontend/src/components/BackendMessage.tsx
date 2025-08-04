@@ -1,3 +1,4 @@
+import { Typography } from "@mui/material";
 import { useState, useEffect } from "react";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -8,7 +9,6 @@ function BackendMessage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // This endpoint is defined in TestController
         const response = await fetch(`${API_BASE_URL}/api/test`);
         const data = await response.text();
         setMessage(data);
@@ -20,11 +20,9 @@ function BackendMessage() {
   }, []);
 
   return (
-    <div className="card">
-      <p>
-        Backend Status: <strong>{message || "No connection."}</strong>
-      </p>
-    </div>
+    <Typography>
+      Backend Status: <strong>{message || "No connection."}</strong>
+    </Typography>
   );
 }
 
