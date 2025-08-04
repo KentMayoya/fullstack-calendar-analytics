@@ -17,14 +17,7 @@ const AboutPage = () => {
         p: 2,
       }}
     >
-      <Typography
-        component="h1"
-        variant="h4"
-        sx={{
-          fontWeight: "bold",
-        }}
-        gutterBottom
-      >
+      <Typography component="h1" variant="h4" gutterBottom>
         About
       </Typography>
       <Typography sx={{ mb: 2 }}>
@@ -45,14 +38,7 @@ const AboutPage = () => {
         This website is intended to be used on mobile devices. The layout for
         users on larger devices may not display as intended.
       </Typography>
-      <Typography
-        component="h2"
-        variant="h5"
-        sx={{
-          fontWeight: "bold",
-        }}
-        gutterBottom
-      >
+      <Typography component="h2" variant="h5" gutterBottom>
         The Developer
       </Typography>
       <Typography sx={{ mb: 2 }}>
@@ -82,14 +68,7 @@ const AboutPage = () => {
           LinkedIn
         </Link>
       </Typography>
-      <Typography
-        component="h2"
-        variant="h5"
-        sx={{
-          fontWeight: "bold",
-        }}
-        gutterBottom
-      >
+      <Typography component="h2" variant="h5" gutterBottom>
         Learning Objectives
       </Typography>
       <List>
@@ -109,14 +88,7 @@ const AboutPage = () => {
           </ListItem>
         ))}
       </List>
-      <Typography
-        component="h2"
-        variant="h5"
-        sx={{
-          fontWeight: "bold",
-        }}
-        gutterBottom
-      >
+      <Typography component="h2" variant="h5" gutterBottom>
         Documentation
       </Typography>
       <Typography sx={{ mb: 2 }}>
