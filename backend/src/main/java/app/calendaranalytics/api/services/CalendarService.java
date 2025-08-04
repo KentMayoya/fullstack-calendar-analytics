@@ -337,9 +337,11 @@ public class CalendarService {
     @Transactional
     public void unsyncCalendarEvents(UUID userId, UUID calendarId) {
         // Validate the calendar belongs to the user
-        calendarRepository.findByIdAndUserId(calendarId,
+        Calendar calendar = calendarRepository.findByIdAndUserId(calendarId,
                 userId).orElseThrow(() -> new ResourceNotFoundException(
                 "Calendar not found with id: " + calendarId));
         eventRepository.deleteByCalendarId(calendarId);
+        calendar.setLastSyncedAt(null);
+        calendarRepository.save(calendar);
     }
 }
