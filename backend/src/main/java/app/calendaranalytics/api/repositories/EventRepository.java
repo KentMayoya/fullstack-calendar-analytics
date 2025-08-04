@@ -159,4 +159,10 @@ public interface EventRepository extends JpaRepository<Event, UUID> {
             @Param("calendarIds") List<UUID> calendarIds,
             @Param("tagId") UUID tagId);
 
+    /**
+     * Deletes all Events related to the specified calendarId.
+     *
+     * @param calendarId The calendarId used to search for the Events to delete.
+     */
+    public void deleteByCalendarId(UUID calendarId);
 }

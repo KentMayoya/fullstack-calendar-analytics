@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -90,6 +91,7 @@ public class CalendarController {
      *
      * @param authentication An object provided by the Spring Security
      * framework. Contains all the information regarding the currently logged-in
+     * user.
      * @return A list of CalendarDtos and 200 OK response.
      * @throws IOException If Google Auth library fails to refresh an access
      * token.
@@ -111,6 +113,7 @@ public class CalendarController {
      * @param calendarId The specified calendar's UUID.
      * @param authentication An object provided by the Spring Security
      * framework. Contains all the information regarding the currently logged-in
+     * user.
      * @throws IOException If Google Auth library fails to refresh token.
      * @throws IllegalArgumentException if at least one of the retrieved Events
      * are malformed.
@@ -139,5 +142,24 @@ public class CalendarController {
             throw new IllegalArgumentException("Invalid key: " + requestKey);
         }
         calendarService.syncAllCalendarEvents();
+    }
+
+    /**
+     * Deletes all Events related to the specified calendarId in the database
+     * for the current user.
+     *
+     * @param calendarId The specified calendar's UUID.
+     * @param authentication An object provided by the Spring Security
+     * framework. Contains all the information regarding the currently logged-in
+     * user.
+     * @throws ResourceNotFoundException If the calendarId is not valid, or does
+     * not belong to the userId.
+     */
+    @DeleteMapping("/{calendarId}/events")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void unsyncCalendarEvents(@PathVariable UUID calendarId,
+            Authentication authentication) {
+        UUID userId = UUID.fromString(authentication.getName());
+        calendarService.unsyncCalendarEvents(userId, calendarId);
     }
 }
