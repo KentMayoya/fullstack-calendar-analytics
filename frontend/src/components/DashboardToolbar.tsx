@@ -12,6 +12,7 @@ import {
 } from "@mui/material";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import TodayIcon from "@mui/icons-material/Today";
 import {
   useCalendar,
   type Calendar,
@@ -23,6 +24,7 @@ interface DashboardToolbarProps {
   view: string;
   setView: (newView: string) => void;
   onPrevClick: () => void;
+  onTodayClick: () => void;
   onNextClick: () => void;
   selectedCalendars: Calendar[];
   setSelectedCalendars: (calendar: Calendar[]) => void;
@@ -42,6 +44,7 @@ const DashboardToolbar = ({
   view,
   setView,
   onPrevClick,
+  onTodayClick,
   onNextClick,
   selectedCalendars,
   setSelectedCalendars,
@@ -71,14 +74,15 @@ const DashboardToolbar = ({
           boxShadow: "none",
         }}
       >
-        <Toolbar
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-          }}
-        >
+        <Toolbar>
           <Box />
-          <Box>
+          <Box
+            sx={{
+              position: "absolute",
+              left: "50%",
+              transform: "translateX(-50%)",
+            }}
+          >
             <ToggleButtonGroup
               value={view}
               exclusive
@@ -98,6 +102,11 @@ const DashboardToolbar = ({
                 Year
               </ToggleButton>
             </ToggleButtonGroup>
+          </Box>
+          <Box sx={{ ml: "auto" }}>
+            <IconButton onClick={onTodayClick}>
+              <TodayIcon />
+            </IconButton>
           </Box>
           <Box />
         </Toolbar>
