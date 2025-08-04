@@ -155,12 +155,11 @@ public class CalendarController {
      * @throws ResourceNotFoundException If the calendarId is not valid, or does
      * not belong to the userId.
      */
-    @DeleteMapping("/{calendarId}")
+    @DeleteMapping("/{calendarId}/events")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void unsyncCalendar(@PathVariable UUID calendarId,
+    public void unsyncCalendarEvents(@PathVariable UUID calendarId,
             Authentication authentication) {
         UUID userId = UUID.fromString(authentication.getName());
-        calendarService.unsyncCalendar(userId, calendarId);
+        calendarService.unsyncCalendarEvents(userId, calendarId);
     }
-
 }

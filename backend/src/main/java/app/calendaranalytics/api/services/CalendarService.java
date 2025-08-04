@@ -335,7 +335,7 @@ public class CalendarService {
      * not belong to the userId.
      */
     @Transactional
-    public void unsyncCalendar(UUID userId, UUID calendarId) {
+    public void unsyncCalendarEvents(UUID userId, UUID calendarId) {
         // Validate the calendar belongs to the user
         calendarRepository.findByIdAndUserId(calendarId,
                 userId).orElseThrow(() -> new ResourceNotFoundException(
