@@ -48,11 +48,6 @@ const DashboardPage = () => {
     []
   );
 
-  // If the user does not have a valid session, redirect to the home page
-  if (!session?.auth) {
-    return <Navigate to="/" replace />;
-  }
-
   // Sets the date range back by the period specified in view
   const onPrevClick = () => {
     if (view === "day") {
@@ -63,6 +58,20 @@ const DashboardPage = () => {
       setCurrentDate((prevDate) => subMonths(startOfMonth(prevDate), 1));
     } else {
       setCurrentDate((prevDate) => subYears(startOfYear(prevDate), 1));
+    }
+  };
+
+  // Sets the date where the period includes today's date
+  const onTodayClick = () => {
+    const today = new Date();
+    if (view === "day") {
+      setCurrentDate(today);
+    } else if (view === "week") {
+      setCurrentDate(startOfWeek(today));
+    } else if (view === "month") {
+      setCurrentDate(startOfMonth(today));
+    } else {
+      setCurrentDate(startOfYear(today));
     }
   };
 
@@ -122,6 +131,12 @@ const DashboardPage = () => {
         start = startOfYear(currentDate);
         end = endOfYear(currentDate);
       }
+
+      // If the user does not have a valid session, redirect to the home page
+      if (!session?.auth) {
+        return <Navigate to="/" replace />;
+      }
+
       // Format query parameters for the endpoint
       const startDateString = format(start, "yyyy-MM-dd");
       const endDateString = format(end, "yyyy-MM-dd");
@@ -229,6 +244,7 @@ const DashboardPage = () => {
         view={view}
         setView={setView}
         onPrevClick={onPrevClick}
+        onTodayClick={onTodayClick}
         onNextClick={onNextClick}
         selectedCalendars={selectedCalendars}
         setSelectedCalendars={setSelectedCalendars}
