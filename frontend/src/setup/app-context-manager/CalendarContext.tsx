@@ -123,7 +123,22 @@ export const CalendarContextProvider = ({
       )
     );
     try {
-      const response = await fetch(
+      if (currentStatus) {
+        // Unsync operation
+        const deleteResponse = await fetch(
+          `${API_BASE_URL}/api/v1/calendars/${calendarId}/events`,
+          {
+            method: "DELETE",
+            headers: { Authorization: `Bearer ${session.access_token}` },
+          }
+        );
+        if (!deleteResponse.ok) {
+          throw new Error(
+            `Delete calendar events API call failed with status: ${deleteResponse.status}`
+          );
+        }
+      }
+      const putResponse = await fetch(
         `${API_BASE_URL}/api/v1/calendars/${calendarId}`,
         {
           method: "PUT",
@@ -134,8 +149,10 @@ export const CalendarContextProvider = ({
           body: JSON.stringify({ isSynced: !currentStatus }),
         }
       );
-      if (!response.ok) {
-        throw new Error(`API call failed with status: ${response.status}`);
+      if (!putResponse.ok) {
+        throw new Error(
+          `Update calendar sync API call failed with status: ${putResponse.status}`
+        );
       }
       // If currentStatus is true, toggling was just set to false
       if (currentStatus) {

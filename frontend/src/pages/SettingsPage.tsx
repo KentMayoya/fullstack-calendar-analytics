@@ -22,8 +22,12 @@ import InfoOutlineIcon from "@mui/icons-material/InfoOutline";
 import { useUser } from "../setup/app-context-manager/UserContext";
 import { Navigate } from "react-router-dom";
 import { useState } from "react";
-import { useCalendar } from "../setup/app-context-manager/CalendarContext";
+import {
+  useCalendar,
+  type Calendar,
+} from "../setup/app-context-manager/CalendarContext";
 import { useTags } from "../hooks/useTags";
+import UnsyncCalendar from "../components/UnsyncCalendarModal";
 
 const SettingsPage = () => {
   const { session } = useUser();
@@ -31,6 +35,10 @@ const SettingsPage = () => {
 
   // Used when fetching calendars from Google Calendar
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
+
+  const [calendarToUnsync, setCalendarToUnSync] = useState<Calendar | null>(
+    null
+  );
 
   // Boolean flag to display textbox
   const [isAddingTag, setIsAddingTag] = useState<boolean>(false);
@@ -49,9 +57,14 @@ const SettingsPage = () => {
 
   // calendars: Contains a list of calendars from the database
   // loading: Used when fetching calendars from the database
-  // handleToggleSync: Updates the database when a user toggles a switch for
+  // updateSyncStatus: Updates the database when a user toggles a switch for
   // a specified calendar
-  const { setCalendars, calendars, loading, handleToggleSync } = useCalendar();
+  const {
+    setCalendars,
+    calendars,
+    loading,
+    handleToggleSync: updateSyncStatus,
+  } = useCalendar();
 
   // Controls the visibility of the Sync Info Dialog
   const [isSyncInfoDialogOpen, setIsSyncInfoDialogOpen] =
@@ -61,7 +74,16 @@ const SettingsPage = () => {
   const [isTagInfoDialogOpen, setIsTagInfoDialogOpen] =
     useState<boolean>(false);
 
+  // Controls the visibility of the UnsyncCalendarModal
+  const [isUnsyncCalendarModalOpen, setIsUnsyncCalendarModalOpen] =
+    useState<boolean>(false);
+
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+  // If the user does not have a valid session, redirect to the home page
+  if (!session?.auth) {
+    return <Navigate to="/" replace />;
+  }
 
   // Fetches Google Calendars through the Google Calendar API
   const fetchGoogleCalendars = async () => {
@@ -85,10 +107,28 @@ const SettingsPage = () => {
     }
   };
 
-  // If the user does not have a valid session, redirect to the home page
-  if (!session?.auth) {
-    return <Navigate to="/" replace />;
-  }
+  // If the calendar is to be unsynced, displays the Confirmation modal to
+  // unsync an event and updates the calendar's sync status in the database
+  const handleToggleSync = (calendar: Calendar) => {
+    const { id, isSynced } = calendar;
+    if (!isSynced) {
+      // If turning ON, start the sync.
+      updateSyncStatus(id, isSynced);
+    } else {
+      // If turning OFF, store the calendar and open the confirmation modal.
+      setCalendarToUnSync(calendar);
+      setIsUnsyncCalendarModalOpen(true);
+    }
+  };
+
+  // Calls the endpoint to delete events related to calendarToUnsync
+  const handleConfirm = () => {
+    if (calendarToUnsync) {
+      updateSyncStatus(calendarToUnsync.id, calendarToUnsync.isSynced);
+    }
+    setIsUnsyncCalendarModalOpen(false);
+    setCalendarToUnSync(null);
+  };
 
   // Calls /api/v1/tags endpoint to create a tag
   const handleCreateTag = async () => {
@@ -258,13 +298,18 @@ const SettingsPage = () => {
               <Switch
                 edge="end"
                 checked={calendar.isSynced ?? false}
-                onChange={() =>
-                  handleToggleSync(calendar.id, calendar.isSynced)
-                }
+                onChange={() => handleToggleSync(calendar)}
               />
             </ListItem>
           ))}
         </List>
+      )}
+      {isUnsyncCalendarModalOpen && calendarToUnsync && (
+        <UnsyncCalendar
+          handleClose={() => setIsUnsyncCalendarModalOpen(false)}
+          calendarName={calendarToUnsync.name}
+          handleConfirm={handleConfirm}
+        ></UnsyncCalendar>
       )}
       <Button
         variant="contained"
