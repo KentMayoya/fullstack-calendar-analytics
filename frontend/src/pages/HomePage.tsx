@@ -11,13 +11,21 @@ const HomePage = () => {
         <Typography
           component="h1"
           variant="h4"
+          align="center"
           sx={{
             fontWeight: "bold",
           }}
         >
           Analytics for Your Google Calendar
         </Typography>
-        <Box sx={{ display: "flex", alignItems: "center", p: 2 }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            p: 2,
+          }}
+        >
           <Box
             component="img"
             src="src/assets/google-calendar-icon.png"
