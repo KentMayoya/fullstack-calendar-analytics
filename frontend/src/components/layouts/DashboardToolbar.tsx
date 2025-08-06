@@ -16,8 +16,8 @@ import TodayIcon from "@mui/icons-material/Today";
 import {
   useCalendar,
   type Calendar,
-} from "../setup/app-context-manager/CalendarContext";
-import { type Tag, useTags } from "../hooks/useTags";
+} from "../../setup/app-context-manager/CalendarContext";
+import { type Tag, useTags } from "../../hooks/useTags";
 
 interface DashboardToolbarProps {
   title: string;

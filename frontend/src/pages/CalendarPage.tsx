@@ -6,11 +6,11 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import listPlugin from "@fullcalendar/list";
 import type { EventInput, DatesSetArg } from "@fullcalendar/core";
-import CalendarToolbar from "../components/CalendarToolbar";
+import CalendarToolbar from "../components/layouts/CalendarToolbar";
 import { useUser } from "../setup/app-context-manager/UserContext";
 import { useCalendar } from "../setup/app-context-manager/CalendarContext";
 import type { EventClickArg } from "@fullcalendar/core";
-import ApplyTagsModal from "../components/ApplyTagsModal";
+import ApplyTagsModal from "../components/modals/ApplyTagsModal";
 
 const CalendarPage = () => {
   // Stores the title to display on the Calendar header

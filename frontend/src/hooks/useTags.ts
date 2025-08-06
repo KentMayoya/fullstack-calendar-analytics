@@ -10,7 +10,7 @@ export const useTags = () => {
   const context = useUser();
   const { session } = context;
   const [tags, setTags] = useState<Tag[]>([]); 
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoadingTags, setIsLoadingTags] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
 
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -21,7 +21,7 @@ export const useTags = () => {
     if (!session?.access_token) {
         return;
     }
-    setIsLoading(true);
+    setIsLoadingTags(true);
     setError("");
     try {
         const response = await fetch(`${API_BASE_URL}/api/v1/tags`, {
@@ -37,7 +37,7 @@ export const useTags = () => {
     } catch (err: any) {
         setError(err.message);
     } finally {
-        setIsLoading(false);
+        setIsLoadingTags(false);
     }
   }, [session?.access_token, API_BASE_URL])
 
@@ -46,5 +46,5 @@ export const useTags = () => {
     fetchTags();
   }, [fetchTags])
   
-  return { tags, setTags, isLoading, error, fetchTags }
+  return { tags, setTags, isLoadingTags, error, fetchTags }
 }

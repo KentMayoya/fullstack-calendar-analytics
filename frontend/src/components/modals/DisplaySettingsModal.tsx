@@ -1,11 +1,14 @@
 import { useState } from "react";
+import ReusableModal from "./ReusableModal";
 import {
-  Box,
   Typography,
+  ToggleButtonGroup,
+  ToggleButton,
+  CircularProgress,
   FormControlLabel,
   Checkbox,
+  Box,
   Button,
-  CircularProgress,
   IconButton,
   Dialog,
   DialogTitle,
@@ -14,74 +17,83 @@ import {
 import {
   useCalendar,
   toggleIdInSet,
-} from "../setup/app-context-manager/CalendarContext";
-import { useUser } from "../setup/app-context-manager/UserContext";
-import ReusableModal from "./ReusableModal";
+} from "../../setup/app-context-manager/CalendarContext";
 import InfoOutlineIcon from "@mui/icons-material/InfoOutline";
 
-type SyncSettingsModalProps = {
+type DisplaySettingsModalProps = {
   handleClose: () => void;
   handleGoToSettings: () => void;
 };
 
-const SyncSettingsModal = ({
+const DisplaySettingsModal = ({
   handleClose,
   handleGoToSettings,
-}: SyncSettingsModalProps) => {
-  const { session } = useUser();
+}: DisplaySettingsModalProps) => {
+  const {
+    syncedCalendars,
+    loading,
+    selectedIds: savedSelectedIds,
+    saveSelectedIds,
+    currentView,
+    setCurrentView,
+  } = useCalendar();
 
-  // calendars contains a list of Calendars' id, name, and isSynced
-  // loading is true if the calendars are still being fetched. Otherwise, false
-  const { syncedCalendars, loading } = useCalendar();
+  // As the user is able to save or cancel their changes, this modal will have
+  // a local copy
+  const [draftSelectedIds, setDraftSelectedIds] = useState(savedSelectedIds);
 
-  // A local copy of selectedIds that contain the ids of the calendars
-  // the user wishes to sync.
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  // Local copy of the current view. The actual view is not committed until
+  // the user selects Save
+  const [draftSelectedView, setDraftSelectedView] =
+    useState<string>(currentView);
 
   // Controls the visibility of the Info Dialog
   const [isInfoDialogOpen, setIsInfoDialogOpen] = useState<boolean>(false);
 
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
-  // Fetches Google Calendar events from the selected calendar checkboxes
-  const handleSyncEvents = async () => {
-    if (!session?.access_token) {
-      return;
-    }
-    const calendarIdsToSync = Array.from(selectedIds);
-    for (const calendarId of calendarIdsToSync) {
-      try {
-        const response = await fetch(
-          `${API_BASE_URL}/api/v1/calendars/${calendarId}/sync`,
-          {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${session.access_token}`,
-            },
-          }
-        );
-        if (!response.ok) {
-          throw new Error(
-            `Sync failed for calendar ${calendarId} with status ${response.status}`
-          );
-        }
-      } catch (error) {
-        console.error(error);
-      }
-    }
+  // Saves the selectedIds managed by CalendarContext using the selected Ids
+  // in draftSelectedIds
+  const handleSave = () => {
+    saveSelectedIds(draftSelectedIds);
+    setCurrentView(draftSelectedView);
     handleClose();
   };
 
-  // Function is triggered when a user checks or unchecks the calendar
-  // checkboxes. Syncs the ids in selectedIds.
-  const handleSelectionChange = (calendarId: string) => {
-    setSelectedIds((prev) => toggleIdInSet(prev, calendarId));
+  // Sets the current view to draftSelectedView when the user selects a new view
+  // from the ToggleButtonGroup
+  const handleViewChange = (
+    _event: React.MouseEvent<HTMLElement>,
+    newView: string | null
+  ) => {
+    // newView can be null if the user clicks the same button again
+    if (newView !== null) {
+      setDraftSelectedView(newView);
+    }
   };
 
   return (
     <ReusableModal isOpen={true} handleClose={handleClose}>
       {!loading && (
         <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
+          <Typography
+            component="h2"
+            variant="h6"
+            sx={{
+              fontWeight: "bold",
+            }}
+          >
+            Calendar View
+          </Typography>
+          <Box sx={{ display: "flex", justifyContent: "center", p: 2 }}>
+            <ToggleButtonGroup
+              exclusive
+              value={draftSelectedView}
+              onChange={handleViewChange}
+            >
+              <ToggleButton value="timeGridWeek">Week</ToggleButton>
+              <ToggleButton value="timeGridDay">Day</ToggleButton>
+              <ToggleButton value="listWeek">List</ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
           <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
             <Typography
               component="h2"
@@ -90,7 +102,7 @@ const SyncSettingsModal = ({
                 fontWeight: "bold",
               }}
             >
-              My Calendars
+              Displayed Calendars
             </Typography>
             <IconButton
               onClick={() => setIsInfoDialogOpen(true)}
@@ -103,15 +115,14 @@ const SyncSettingsModal = ({
             open={isInfoDialogOpen}
             onClose={() => setIsInfoDialogOpen(false)}
           >
-            <DialogTitle>Syncing Calendars</DialogTitle>
+            <DialogTitle>Managing Displayed Calendars</DialogTitle>
             <DialogContent>
               <Typography>
-                You can select which calendars to sync here. Only the calendars
-                marked as syncable under "Calendar Sync Settings" on the
-                Settings page are displayed. Calendar events that were created,
-                modified, or deleted within the last 30 days are synced. Syncing
-                a calendar does not automatically display the calendar event's
-                visibility. To modify visibility, see "Display Settings".
+                You can modify the visiblity of your calendars here. Only the
+                calendars marked as syncable under "Calendar Sync Settings" on
+                the Settings page are displayed. Displaying a calendar does not
+                trigger a sync for your calendar events. To sync events, see
+                "Sync Settings".
               </Typography>
             </DialogContent>
           </Dialog>
@@ -137,8 +148,12 @@ const SyncSettingsModal = ({
                     key={calendar.id}
                     control={
                       <Checkbox
-                        checked={selectedIds.has(calendar.id)}
-                        onChange={() => handleSelectionChange(calendar.id)}
+                        checked={draftSelectedIds.has(calendar.id)}
+                        onChange={() =>
+                          setDraftSelectedIds((prev) =>
+                            toggleIdInSet(prev, calendar.id)
+                          )
+                        }
                       />
                     }
                     label={calendar.name}
@@ -157,12 +172,8 @@ const SyncSettingsModal = ({
               Cancel
             </Button>
             {syncedCalendars.length > 0 ? (
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleSyncEvents}
-              >
-                Sync Events
+              <Button variant="contained" color="primary" onClick={handleSave}>
+                Save
               </Button>
             ) : (
               <Button
@@ -180,4 +191,4 @@ const SyncSettingsModal = ({
   );
 };
 
-export default SyncSettingsModal;
+export default DisplaySettingsModal;

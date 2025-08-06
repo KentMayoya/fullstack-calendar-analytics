@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { IconButton } from "@mui/material";
 import ReusableMenu from "./ReusableMenu";
-import { useMenu } from "../hooks/useMenu";
+import { useMenu } from "../../hooks/useMenu";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
-import SyncSettingsModal from "./SyncSettingsModal";
-import DisplaySettingsModal from "./DisplaySettingsModal";
+import SyncSettingsModal from "../modals/SyncSettingsModal";
+import DisplaySettingsModal from "../modals/DisplaySettingsModal";
 import { useNavigate } from "react-router-dom";
 
 const UserMenu = () => {

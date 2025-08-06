@@ -36,7 +36,7 @@ interface CalendarContextType {
   currentView: string;
   setCurrentView: React.Dispatch<React.SetStateAction<string>>;
   syncedCalendars: Calendar[];
-  loading: boolean;
+  isLoadingCalendars: boolean;
   error: string;
   selectedIds: Set<string>;
   saveSelectedIds: (newIds: Set<string>) => void;
@@ -44,6 +44,7 @@ interface CalendarContextType {
     calendarId: string,
     currentStatus: boolean
   ) => Promise<void>;
+  isUnsyncingEvents: boolean;
 }
 
 export const CalendarContext = createContext<CalendarContextType | null>(null);
@@ -70,8 +71,9 @@ export const CalendarContextProvider = ({
     return calendars.filter((calendar) => calendar.isSynced);
   }, [calendars]);
 
-  const [loading, setLoading] = useState(false);
+  const [isLoadingCalendars, setIsLoadingCalendars] = useState<boolean>(false);
   const [error, setError] = useState("");
+  const [isUnsyncingEvents, setIsUnsyncingEvents] = useState<boolean>(false);
 
   // Key used to store selectedCalendarIds in localStorage
   const SELECTED_CALENDARS_ID_KEY = "selectedCalendarIds";
@@ -88,7 +90,7 @@ export const CalendarContextProvider = ({
   // Calls /api/v1/calendars to fetch calendars
   const fetchCalendars = useCallback(async () => {
     try {
-      setLoading(true);
+      setIsLoadingCalendars(true);
       if (!session?.access_token) {
         throw new Error("No access token available");
       }
@@ -107,7 +109,7 @@ export const CalendarContextProvider = ({
         setError(error.message);
       }
     } finally {
-      setLoading(false);
+      setIsLoadingCalendars(false);
     }
   }, [session?.access_token, API_BASE_URL]);
 
@@ -141,6 +143,7 @@ export const CalendarContextProvider = ({
     try {
       if (currentStatus) {
         // Unsync operation
+        setIsUnsyncingEvents(true);
         const deleteResponse = await fetch(
           `${API_BASE_URL}/api/v1/calendars/${calendarId}/events`,
           {
@@ -192,6 +195,8 @@ export const CalendarContextProvider = ({
             : calendar
         )
       );
+    } finally {
+      setIsUnsyncingEvents(false);
     }
   };
 
@@ -213,11 +218,12 @@ export const CalendarContextProvider = ({
     currentView,
     setCurrentView,
     syncedCalendars,
-    loading,
+    isLoadingCalendars,
     error,
     selectedIds,
     saveSelectedIds,
     handleToggleSync,
+    isUnsyncingEvents,
   };
 
   return (

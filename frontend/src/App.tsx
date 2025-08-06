@@ -1,6 +1,6 @@
 import "./App.css";
 import { Routes, Route } from "react-router-dom";
-import Header from "./components/Header";
+import Header from "./components/layouts/Header";
 import HomePage from "./pages/HomePage";
 import CalendarPage from "./pages/CalendarPage";
 import DashboardPage from "./pages/DashboardPage";
@@ -10,7 +10,7 @@ import { CalendarContextProvider } from "./setup/app-context-manager/CalendarCon
 import AboutPage from "./pages/AboutPage";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 import BackendMessage from "./components/BackendMessage";
-import ScrollToTop from "./components/ScrollToTop";
+import ScrollToTop from "./components/layouts/ScrollToTop";
 
 function App() {
   return (

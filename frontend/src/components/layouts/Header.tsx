@@ -8,8 +8,8 @@ import {
   Typography,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import DrawerMenu from "./DrawerMenu";
-import UserMenu from "./UserMenu";
+import DrawerMenu from "../menus/DrawerMenu";
+import UserMenu from "../menus/UserMenu";
 import { Link } from "react-router-dom";
 
 const Header = () => {
