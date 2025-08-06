@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.ZoneOffset;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -272,6 +272,7 @@ public class CalendarService {
             eventEntity.setId(UUID.randomUUID());
             eventEntity.setCalendar(calendar);
             eventEntity.setGoogleEventId(googleEvent.getId());
+            eventEntity.setCreatedAt(Instant.now());
         }
         eventEntity.setTitle(googleEvent.getSummary());
         eventEntity.setDescription(googleEvent.getDescription());
@@ -300,8 +301,11 @@ public class CalendarService {
             return Instant.parse(eventDateTime.getDateTime().toStringRfc3339());
         }
         if (eventDateTime.getDate() != null) {
+            // This should eventually come from the user's profile, but hardcoded for now.
+            ZoneId userTimeZone = ZoneId.of("America/Los_Angeles");
             return LocalDate.parse(eventDateTime.getDate().toString())
-                    .atStartOfDay(ZoneOffset.UTC).toInstant();
+                    .atStartOfDay(userTimeZone)
+                    .toInstant();
         }
         throw new IllegalArgumentException("EventDateTime must contain either "
                 + "a dateTime or date property");
