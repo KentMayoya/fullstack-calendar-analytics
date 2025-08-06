@@ -1,6 +1,6 @@
 import { NavLink, useLocation } from "react-router-dom";
 import { Drawer, List, ListItemButton, ListItemText } from "@mui/material";
-import { useUser } from "../setup/app-context-manager/UserContext";
+import { useUser } from "../../setup/app-context-manager/UserContext";
 
 type DrawerMenuProps = {
   open: boolean;

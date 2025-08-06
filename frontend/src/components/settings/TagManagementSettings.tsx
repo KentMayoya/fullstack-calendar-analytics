@@ -18,8 +18,8 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 import InfoOutlineIcon from "@mui/icons-material/InfoOutline";
-import { useUser } from "../setup/app-context-manager/UserContext";
-import { useTags } from "../hooks/useTags";
+import { useUser } from "../../setup/app-context-manager/UserContext";
+import { useTags } from "../../hooks/useTags";
 
 const TagManagementSettings = () => {
   const { session } = useUser();

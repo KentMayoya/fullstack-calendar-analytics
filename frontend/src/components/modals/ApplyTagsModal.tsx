@@ -11,8 +11,8 @@ import {
   IconButton,
 } from "@mui/material";
 import ReusableModal from "./ReusableModal";
-import { useUser } from "../setup/app-context-manager/UserContext";
-import { useTags, type Tag } from "../hooks/useTags";
+import { useUser } from "../../setup/app-context-manager/UserContext";
+import { useTags, type Tag } from "../../hooks/useTags";
 import { useEffect, useState } from "react";
 import InfoOutlineIcon from "@mui/icons-material/InfoOutline";
 

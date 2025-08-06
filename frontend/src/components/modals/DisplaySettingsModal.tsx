@@ -17,7 +17,7 @@ import {
 import {
   useCalendar,
   toggleIdInSet,
-} from "../setup/app-context-manager/CalendarContext";
+} from "../../setup/app-context-manager/CalendarContext";
 import InfoOutlineIcon from "@mui/icons-material/InfoOutline";
 
 type DisplaySettingsModalProps = {

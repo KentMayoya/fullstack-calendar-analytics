@@ -17,9 +17,9 @@ import InfoOutlineIcon from "@mui/icons-material/InfoOutline";
 import {
   type Calendar,
   useCalendar,
-} from "../setup/app-context-manager/CalendarContext";
-import UnsyncCalendarModal from "./UnsyncCalendarModal";
-import { useUser } from "../setup/app-context-manager/UserContext";
+} from "../../setup/app-context-manager/CalendarContext";
+import UnsyncCalendarModal from "../modals/UnsyncCalendarModal";
+import { useUser } from "../../setup/app-context-manager/UserContext";
 
 const CalendarSyncSettings = () => {
   const { session } = useUser();

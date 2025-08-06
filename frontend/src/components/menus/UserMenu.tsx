@@ -1,9 +1,9 @@
-import { useUser } from "../setup/app-context-manager/UserContext";
+import { useUser } from "../../setup/app-context-manager/UserContext";
 import { IconButton, Avatar, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import LoginIcon from "@mui/icons-material/Login";
 import ReusableMenu from "./ReusableMenu";
-import { useMenu } from "../hooks/useMenu";
+import { useMenu } from "../../hooks/useMenu";
 
 const UserMenu = () => {
   const { session, handleLogin, handleLogout } = useUser();

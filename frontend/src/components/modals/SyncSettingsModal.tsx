@@ -15,8 +15,8 @@ import {
 import {
   useCalendar,
   toggleIdInSet,
-} from "../setup/app-context-manager/CalendarContext";
-import { useUser } from "../setup/app-context-manager/UserContext";
+} from "../../setup/app-context-manager/CalendarContext";
+import { useUser } from "../../setup/app-context-manager/UserContext";
 import ReusableModal from "./ReusableModal";
 import InfoOutlineIcon from "@mui/icons-material/InfoOutline";
 

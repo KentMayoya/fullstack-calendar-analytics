@@ -1,10 +1,10 @@
 import { Divider, Box } from "@mui/material";
 import { useUser } from "../setup/app-context-manager/UserContext";
 import { Navigate } from "react-router-dom";
-import ProfileSettings from "../components/ProfileSettings";
-import CalendarSyncSettings from "../components/CalendarSyncSettings";
-import TagManagementSettings from "../components/TagManagementSettings";
-import AccountManagementSettings from "../components/AccountManagementSettings";
+import ProfileSettings from "../components/settings/ProfileSettings";
+import CalendarSyncSettings from "../components/settings/CalendarSyncSettings";
+import TagManagementSettings from "../components/settings/TagManagementSettings";
+import AccountManagementSettings from "../components/settings/AccountManagementSettings";
 
 const SettingsPage = () => {
   const { session } = useUser();

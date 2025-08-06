@@ -1,5 +1,5 @@
 import { Typography, TextField, Box, Switch, Button } from "@mui/material";
-import { useUser } from "../setup/app-context-manager/UserContext";
+import { useUser } from "../../setup/app-context-manager/UserContext";
 
 const ProfileSettings = () => {
   const { session } = useUser();

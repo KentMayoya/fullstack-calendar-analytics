@@ -9,7 +9,7 @@ import {
 import {
   useCalendar,
   type Calendar,
-} from "../setup/app-context-manager/CalendarContext";
+} from "../../setup/app-context-manager/CalendarContext";
 
 type UnsyncCalendarProps = {
   handleClose: () => void;

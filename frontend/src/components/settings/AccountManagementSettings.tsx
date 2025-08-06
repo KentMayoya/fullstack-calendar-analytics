@@ -8,7 +8,7 @@ import {
   Box,
 } from "@mui/material";
 import { useState } from "react";
-import { useUser } from "../setup/app-context-manager/UserContext";
+import { useUser } from "../../setup/app-context-manager/UserContext";
 
 const AccountManagementSettings = () => {
   const { session, supabase } = useUser();

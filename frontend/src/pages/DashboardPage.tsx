@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { Navigate } from "react-router-dom";
-import DashboardToolbar from "../components/DashboardToolbar";
+import DashboardToolbar from "../components/layouts/DashboardToolbar";
 import {
   startOfYear,
   endOfYear,
@@ -24,7 +24,7 @@ import { useUser } from "../setup/app-context-manager/UserContext";
 import { Box, Typography, Paper } from "@mui/material";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import EventIcon from "@mui/icons-material/Event";
-import BreakdownBarChart from "../components/BreakdownBarChart";
+import BreakdownBarChart from "../components/charts/BreakdownBarChart";
 
 interface SummaryData {
   totalMinutes: number;
