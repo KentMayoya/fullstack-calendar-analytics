@@ -34,11 +34,18 @@ const DisplaySettingsModal = ({
     loading,
     selectedIds: savedSelectedIds,
     saveSelectedIds,
+    currentView,
+    setCurrentView,
   } = useCalendar();
 
   // As the user is able to save or cancel their changes, this modal will have
   // a local copy
   const [draftSelectedIds, setDraftSelectedIds] = useState(savedSelectedIds);
+
+  // Local copy of the current view. The actual view is not committed until
+  // the user selects Save
+  const [draftSelectedView, setDraftSelectedView] =
+    useState<string>(currentView);
 
   // Controls the visibility of the Info Dialog
   const [isInfoDialogOpen, setIsInfoDialogOpen] = useState<boolean>(false);
@@ -47,7 +54,20 @@ const DisplaySettingsModal = ({
   // in draftSelectedIds
   const handleSave = () => {
     saveSelectedIds(draftSelectedIds);
+    setCurrentView(draftSelectedView);
     handleClose();
+  };
+
+  // Sets the current view to draftSelectedView when the user selects a new view
+  // from the ToggleButtonGroup
+  const handleViewChange = (
+    _event: React.MouseEvent<HTMLElement>,
+    newView: string | null
+  ) => {
+    // newView can be null if the user clicks the same button again
+    if (newView !== null) {
+      setDraftSelectedView(newView);
+    }
   };
 
   return (
@@ -64,10 +84,14 @@ const DisplaySettingsModal = ({
             Calendar View
           </Typography>
           <Box sx={{ display: "flex", justifyContent: "center", p: 2 }}>
-            <ToggleButtonGroup exclusive>
-              <ToggleButton value="week">Week</ToggleButton>
-              <ToggleButton value="day">Day</ToggleButton>
-              <ToggleButton value="list">List</ToggleButton>
+            <ToggleButtonGroup
+              exclusive
+              value={draftSelectedView}
+              onChange={handleViewChange}
+            >
+              <ToggleButton value="timeGridWeek">Week</ToggleButton>
+              <ToggleButton value="timeGridDay">Day</ToggleButton>
+              <ToggleButton value="listWeek">List</ToggleButton>
             </ToggleButtonGroup>
           </Box>
           <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>

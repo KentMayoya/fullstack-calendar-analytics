@@ -33,6 +33,8 @@ export const toggleIdInSet = (
 interface CalendarContextType {
   calendars: Calendar[];
   setCalendars: React.Dispatch<React.SetStateAction<Calendar[]>>;
+  currentView: string;
+  setCurrentView: React.Dispatch<React.SetStateAction<string>>;
   syncedCalendars: Calendar[];
   loading: boolean;
   error: string;
@@ -53,6 +55,7 @@ export const CalendarContextProvider = ({
 }) => {
   const { session } = useUser();
   const [calendars, setCalendars] = useState<Calendar[]>([]);
+  const [currentView, setCurrentView] = useState<string>("timeGridWeek");
 
   // filters out unsynced calendars
   const syncedCalendars = useMemo(() => {
@@ -194,6 +197,8 @@ export const CalendarContextProvider = ({
   const value = {
     calendars,
     setCalendars,
+    currentView,
+    setCurrentView,
     syncedCalendars,
     loading,
     error,

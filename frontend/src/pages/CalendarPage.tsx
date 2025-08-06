@@ -4,6 +4,7 @@ import { Box, Toolbar } from "@mui/material";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
+import listPlugin from "@fullcalendar/list";
 import type { EventInput, DatesSetArg } from "@fullcalendar/core";
 import CalendarToolbar from "../components/CalendarToolbar";
 import { useUser } from "../setup/app-context-manager/UserContext";
@@ -30,7 +31,7 @@ const CalendarPage = () => {
   const [isApplyTagsModalOpen, setIsApplyTagsModalOpen] =
     useState<boolean>(false);
 
-  const { selectedIds } = useCalendar();
+  const { selectedIds, currentView } = useCalendar();
 
   const { session } = useUser();
 
@@ -82,6 +83,11 @@ const CalendarPage = () => {
     };
     fetchEvents();
   }, [viewInfo, session?.access_token, API_BASE_URL, selectedIds]);
+
+  // Changes the calendar view when currentView changes
+  useEffect(() => {
+    calendarRef.current?.getApi().changeView(currentView);
+  }, [currentView]);
 
   // If the user does not have a valid session, redirect to the home page
   if (!session?.auth) {
@@ -146,7 +152,7 @@ const CalendarPage = () => {
       <Box sx={{ flexGrow: 1, p: 2, overflow: "hidden" }}>
         <FullCalendar
           ref={calendarRef}
-          plugins={[dayGridPlugin, timeGridPlugin]}
+          plugins={[dayGridPlugin, timeGridPlugin, listPlugin]}
           initialView="timeGridWeek"
           headerToolbar={false}
           datesSet={handleDatesSet}
