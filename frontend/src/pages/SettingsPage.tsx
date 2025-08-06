@@ -27,7 +27,7 @@ import {
   type Calendar,
 } from "../setup/app-context-manager/CalendarContext";
 import { useTags } from "../hooks/useTags";
-import UnsyncCalendar from "../components/UnsyncCalendarModal";
+import UnsyncCalendarModal from "../components/UnsyncCalendarModal";
 
 const SettingsPage = () => {
   const { session, supabase } = useUser();
@@ -124,15 +124,6 @@ const SettingsPage = () => {
       setCalendarToUnSync(calendar);
       setIsUnsyncCalendarModalOpen(true);
     }
-  };
-
-  // Calls the endpoint to delete events related to calendarToUnsync
-  const handleUnsyncConfirm = () => {
-    if (calendarToUnsync) {
-      updateSyncStatus(calendarToUnsync.id, calendarToUnsync.isSynced);
-    }
-    setIsUnsyncCalendarModalOpen(false);
-    setCalendarToUnSync(null);
   };
 
   // Calls /api/v1/tags endpoint to create a tag
@@ -336,11 +327,13 @@ const SettingsPage = () => {
         </List>
       )}
       {isUnsyncCalendarModalOpen && calendarToUnsync && (
-        <UnsyncCalendar
-          handleClose={() => setIsUnsyncCalendarModalOpen(false)}
-          calendarName={calendarToUnsync.name}
-          handleConfirm={handleUnsyncConfirm}
-        ></UnsyncCalendar>
+        <UnsyncCalendarModal
+          handleClose={() => {
+            setIsUnsyncCalendarModalOpen(false);
+            setCalendarToUnSync(null);
+          }}
+          calendar={calendarToUnsync}
+        ></UnsyncCalendarModal>
       )}
       <Button
         variant="contained"

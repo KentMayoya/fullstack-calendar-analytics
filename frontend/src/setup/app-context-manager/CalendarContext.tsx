@@ -44,6 +44,7 @@ interface CalendarContextType {
     calendarId: string,
     currentStatus: boolean
   ) => Promise<void>;
+  isUnsyncingEvents: boolean;
 }
 
 export const CalendarContext = createContext<CalendarContextType | null>(null);
@@ -70,9 +71,9 @@ export const CalendarContextProvider = ({
     return calendars.filter((calendar) => calendar.isSynced);
   }, [calendars]);
 
-  //
-  const [isLoadingCalendars, setIsLoadingCalendars] = useState(false);
+  const [isLoadingCalendars, setIsLoadingCalendars] = useState<boolean>(false);
   const [error, setError] = useState("");
+  const [isUnsyncingEvents, setIsUnsyncingEvents] = useState<boolean>(false);
 
   // Key used to store selectedCalendarIds in localStorage
   const SELECTED_CALENDARS_ID_KEY = "selectedCalendarIds";
@@ -142,6 +143,7 @@ export const CalendarContextProvider = ({
     try {
       if (currentStatus) {
         // Unsync operation
+        setIsUnsyncingEvents(true);
         const deleteResponse = await fetch(
           `${API_BASE_URL}/api/v1/calendars/${calendarId}/events`,
           {
@@ -193,6 +195,8 @@ export const CalendarContextProvider = ({
             : calendar
         )
       );
+    } finally {
+      setIsUnsyncingEvents(false);
     }
   };
 
@@ -219,6 +223,7 @@ export const CalendarContextProvider = ({
     selectedIds,
     saveSelectedIds,
     handleToggleSync,
+    isUnsyncingEvents,
   };
 
   return (
