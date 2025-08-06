@@ -28,6 +28,7 @@ import {
 } from "../setup/app-context-manager/CalendarContext";
 import { useTags } from "../hooks/useTags";
 import UnsyncCalendarModal from "../components/UnsyncCalendarModal";
+import ProfileSettings from "../components/ProfileSettings";
 
 const SettingsPage = () => {
   const { session, supabase } = useUser();
@@ -241,39 +242,7 @@ const SettingsPage = () => {
 
   return (
     <Box sx={{ p: { xs: 1, lg: 3 } }}>
-      <Typography
-        component="h2"
-        variant="h6"
-        sx={{
-          fontWeight: "bold",
-        }}
-      >
-        Profile and Preferences
-      </Typography>
-      <Typography sx={{ my: 2 }}>Email: {session?.profile?.email}</Typography>
-      <TextField
-        label="Display Name"
-        variant="outlined"
-        defaultValue={session?.profile?.fullName}
-        fullWidth
-        sx={{
-          maxWidth: { xs: "95%", lg: "20%" },
-        }}
-      />
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          my: 2,
-        }}
-      >
-        <Typography>Dark Mode</Typography>
-        <Switch />
-      </Box>
-      <Button variant="contained" color="primary">
-        Save
-      </Button>
+      <ProfileSettings />
       <Divider sx={{ my: 2 }} />
       <Box sx={{ display: "flex", alignItems: "center" }}>
         <Typography
