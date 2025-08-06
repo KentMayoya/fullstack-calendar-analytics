@@ -31,7 +31,7 @@ import UnsyncCalendar from "../components/UnsyncCalendarModal";
 
 const SettingsPage = () => {
   const { session, supabase } = useUser();
-  const { tags, fetchTags, isLoading: isLoadingTags } = useTags();
+  const { tags, fetchTags, isLoadingTags } = useTags();
 
   // Used when fetching calendars from Google Calendar
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
@@ -56,13 +56,13 @@ const SettingsPage = () => {
   const [editedTagName, setEditedTagName] = useState<string>("");
 
   // calendars: Contains a list of calendars from the database
-  // loading: Used when fetching calendars from the database
+  // isLoadingCalendars: Used when fetching calendars from the database
   // updateSyncStatus: Updates the database when a user toggles a switch for
   // a specified calendar
   const {
     setCalendars,
     calendars,
-    loading,
+    isLoadingCalendars,
     handleToggleSync: updateSyncStatus,
   } = useCalendar();
 
@@ -316,12 +316,12 @@ const SettingsPage = () => {
           </Typography>
         </DialogContent>
       </Dialog>
-      {(loading || isSyncing) && (
+      {(isLoadingCalendars || isSyncing) && (
         <Box>
           <CircularProgress />
         </Box>
       )}
-      {!loading && !isSyncing && (
+      {!isLoadingCalendars && !isSyncing && (
         <List>
           {calendars.map((calendar) => (
             <ListItem key={calendar.id} sx={{ py: 0 }}>

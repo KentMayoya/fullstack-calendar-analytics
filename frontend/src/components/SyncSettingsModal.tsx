@@ -33,7 +33,7 @@ const SyncSettingsModal = ({
 
   // calendars contains a list of Calendars' id, name, and isSynced
   // isLoadingCalendars is true if the calendars are still being fetched. Otherwise, false
-  const { syncedCalendars, loading: isLoadingCalendars } = useCalendar();
+  const { syncedCalendars, isLoadingCalendars } = useCalendar();
 
   const [isSyncingEvents, setIsSyncingEvents] = useState<boolean>(false);
 

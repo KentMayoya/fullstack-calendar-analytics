@@ -36,7 +36,7 @@ interface CalendarContextType {
   currentView: string;
   setCurrentView: React.Dispatch<React.SetStateAction<string>>;
   syncedCalendars: Calendar[];
-  loading: boolean;
+  isLoadingCalendars: boolean;
   error: string;
   selectedIds: Set<string>;
   saveSelectedIds: (newIds: Set<string>) => void;
@@ -70,7 +70,8 @@ export const CalendarContextProvider = ({
     return calendars.filter((calendar) => calendar.isSynced);
   }, [calendars]);
 
-  const [loading, setLoading] = useState(false);
+  //
+  const [isLoadingCalendars, setIsLoadingCalendars] = useState(false);
   const [error, setError] = useState("");
 
   // Key used to store selectedCalendarIds in localStorage
@@ -88,7 +89,7 @@ export const CalendarContextProvider = ({
   // Calls /api/v1/calendars to fetch calendars
   const fetchCalendars = useCallback(async () => {
     try {
-      setLoading(true);
+      setIsLoadingCalendars(true);
       if (!session?.access_token) {
         throw new Error("No access token available");
       }
@@ -107,7 +108,7 @@ export const CalendarContextProvider = ({
         setError(error.message);
       }
     } finally {
-      setLoading(false);
+      setIsLoadingCalendars(false);
     }
   }, [session?.access_token, API_BASE_URL]);
 
@@ -213,7 +214,7 @@ export const CalendarContextProvider = ({
     currentView,
     setCurrentView,
     syncedCalendars,
-    loading,
+    isLoadingCalendars,
     error,
     selectedIds,
     saveSelectedIds,
