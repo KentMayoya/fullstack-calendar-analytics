@@ -10,6 +10,7 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
+  Backdrop,
 } from "@mui/material";
 import {
   useCalendar,
@@ -31,8 +32,10 @@ const SyncSettingsModal = ({
   const { session } = useUser();
 
   // calendars contains a list of Calendars' id, name, and isSynced
-  // loading is true if the calendars are still being fetched. Otherwise, false
-  const { syncedCalendars, loading } = useCalendar();
+  // isLoadingCalendars is true if the calendars are still being fetched. Otherwise, false
+  const { syncedCalendars, loading: isLoadingCalendars } = useCalendar();
+
+  const [isSyncingEvents, setIsSyncingEvents] = useState<boolean>(false);
 
   // A local copy of selectedIds that contain the ids of the calendars
   // the user wishes to sync.
@@ -49,6 +52,7 @@ const SyncSettingsModal = ({
       return;
     }
     const calendarIdsToSync = Array.from(selectedIds);
+    setIsSyncingEvents(true);
     for (const calendarId of calendarIdsToSync) {
       try {
         const response = await fetch(
@@ -67,6 +71,8 @@ const SyncSettingsModal = ({
         }
       } catch (error) {
         console.error(error);
+      } finally {
+        setIsSyncingEvents(false);
       }
     }
     handleClose();
@@ -79,8 +85,29 @@ const SyncSettingsModal = ({
   };
 
   return (
-    <ReusableModal isOpen={true} handleClose={handleClose}>
-      {!loading && (
+    <ReusableModal
+      isOpen={true}
+      // Do not allow the modal to close while events are syncing
+      handleClose={isSyncingEvents ? () => {} : handleClose}
+    >
+      <Backdrop
+        sx={{ color: "white", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={isSyncingEvents}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <CircularProgress color="inherit" />
+          <Typography sx={{ mt: 2 }}>
+            Syncing your events. Hang tight!
+          </Typography>
+        </Box>
+      </Backdrop>
+      {!isLoadingCalendars && (
         <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
           <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
             <Typography
@@ -122,8 +149,8 @@ const SyncSettingsModal = ({
               maxHeight: 200,
             }}
           >
-            {loading && <CircularProgress />}
-            {!loading &&
+            {isLoadingCalendars && <CircularProgress />}
+            {!isLoadingCalendars &&
               (syncedCalendars.length === 0 ? (
                 <Typography
                   sx={{ color: "text.secondary", textAlign: "center" }}
