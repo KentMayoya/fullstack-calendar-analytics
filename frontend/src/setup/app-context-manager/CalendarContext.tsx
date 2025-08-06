@@ -55,7 +55,15 @@ export const CalendarContextProvider = ({
 }) => {
   const { session } = useUser();
   const [calendars, setCalendars] = useState<Calendar[]>([]);
-  const [currentView, setCurrentView] = useState<string>("timeGridWeek");
+
+  const CALENDAR_VIEW_KEY = "calendarView";
+
+  // Loads the current view from local storage. Defaults to timeGridWeek if
+  // nothing is saved
+  const [currentView, setCurrentView] = useState<string>(() => {
+    const savedView = localStorage.getItem(CALENDAR_VIEW_KEY);
+    return savedView ? savedView : "timeGridWeek";
+  });
 
   // filters out unsynced calendars
   const syncedCalendars = useMemo(() => {
@@ -107,6 +115,11 @@ export const CalendarContextProvider = ({
   useEffect(() => {
     fetchCalendars();
   }, [fetchCalendars]);
+
+  // Updates the current view in local storage whenever the view changes
+  useEffect(() => {
+    localStorage.setItem(CALENDAR_VIEW_KEY, currentView);
+  }, [currentView]);
 
   // Updates the database when a user toggles a switch for a specified calendar
   const handleToggleSync = async (
