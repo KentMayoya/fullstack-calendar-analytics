@@ -4,6 +4,7 @@ import { Box, Toolbar } from "@mui/material";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
+import listPlugin from "@fullcalendar/list";
 import type { EventInput, DatesSetArg } from "@fullcalendar/core";
 import CalendarToolbar from "../components/CalendarToolbar";
 import { useUser } from "../setup/app-context-manager/UserContext";
@@ -30,7 +31,7 @@ const CalendarPage = () => {
   const [isApplyTagsModalOpen, setIsApplyTagsModalOpen] =
     useState<boolean>(false);
 
-  const { selectedIds } = useCalendar();
+  const { selectedIds, currentView } = useCalendar();
 
   const { session } = useUser();
 
@@ -57,21 +58,22 @@ const CalendarPage = () => {
           },
         });
         const data = await response.json();
-        // Map the data to the format FullCalendar expects
+        // Define the Event FullCalendar expects
         interface ApiEvent {
           id: string;
           title: string;
           startTime: string;
           endTime: string;
-          isAllDay: boolean;
+          allDay: boolean;
           color: string;
         }
-        const formattedEvents = (data as ApiEvent[]).map((event) => ({
+        // Convert our Event to the Event FullCalendar expects
+        const formattedEvents = data.map((event: ApiEvent) => ({
           id: event.id,
           title: event.title,
           start: event.startTime,
           end: event.endTime,
-          allDay: event.isAllDay,
+          allDay: event.allDay,
           backgroundColor: event.color,
           borderColor: event.color,
         }));
@@ -82,6 +84,11 @@ const CalendarPage = () => {
     };
     fetchEvents();
   }, [viewInfo, session?.access_token, API_BASE_URL, selectedIds]);
+
+  // Changes the calendar view when currentView changes
+  useEffect(() => {
+    calendarRef.current?.getApi().changeView(currentView);
+  }, [currentView]);
 
   // If the user does not have a valid session, redirect to the home page
   if (!session?.auth) {
@@ -146,7 +153,7 @@ const CalendarPage = () => {
       <Box sx={{ flexGrow: 1, p: 2, overflow: "hidden" }}>
         <FullCalendar
           ref={calendarRef}
-          plugins={[dayGridPlugin, timeGridPlugin]}
+          plugins={[dayGridPlugin, timeGridPlugin, listPlugin]}
           initialView="timeGridWeek"
           headerToolbar={false}
           datesSet={handleDatesSet}

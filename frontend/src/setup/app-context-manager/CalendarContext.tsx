@@ -33,6 +33,8 @@ export const toggleIdInSet = (
 interface CalendarContextType {
   calendars: Calendar[];
   setCalendars: React.Dispatch<React.SetStateAction<Calendar[]>>;
+  currentView: string;
+  setCurrentView: React.Dispatch<React.SetStateAction<string>>;
   syncedCalendars: Calendar[];
   loading: boolean;
   error: string;
@@ -53,6 +55,15 @@ export const CalendarContextProvider = ({
 }) => {
   const { session } = useUser();
   const [calendars, setCalendars] = useState<Calendar[]>([]);
+
+  const CALENDAR_VIEW_KEY = "calendarView";
+
+  // Loads the current view from local storage. Defaults to timeGridWeek if
+  // nothing is saved
+  const [currentView, setCurrentView] = useState<string>(() => {
+    const savedView = localStorage.getItem(CALENDAR_VIEW_KEY);
+    return savedView ? savedView : "timeGridWeek";
+  });
 
   // filters out unsynced calendars
   const syncedCalendars = useMemo(() => {
@@ -104,6 +115,11 @@ export const CalendarContextProvider = ({
   useEffect(() => {
     fetchCalendars();
   }, [fetchCalendars]);
+
+  // Updates the current view in local storage whenever the view changes
+  useEffect(() => {
+    localStorage.setItem(CALENDAR_VIEW_KEY, currentView);
+  }, [currentView]);
 
   // Updates the database when a user toggles a switch for a specified calendar
   const handleToggleSync = async (
@@ -194,6 +210,8 @@ export const CalendarContextProvider = ({
   const value = {
     calendars,
     setCalendars,
+    currentView,
+    setCurrentView,
     syncedCalendars,
     loading,
     error,
