@@ -58,21 +58,22 @@ const CalendarPage = () => {
           },
         });
         const data = await response.json();
-        // Map the data to the format FullCalendar expects
+        // Define the Event FullCalendar expects
         interface ApiEvent {
           id: string;
           title: string;
           startTime: string;
           endTime: string;
-          isAllDay: boolean;
+          allDay: boolean;
           color: string;
         }
-        const formattedEvents = (data as ApiEvent[]).map((event) => ({
+        // Convert our Event to the Event FullCalendar expects
+        const formattedEvents = data.map((event: ApiEvent) => ({
           id: event.id,
           title: event.title,
           start: event.startTime,
           end: event.endTime,
-          allDay: event.isAllDay,
+          allDay: event.allDay,
           backgroundColor: event.color,
           borderColor: event.color,
         }));
