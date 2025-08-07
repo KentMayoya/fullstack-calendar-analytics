@@ -1,4 +1,5 @@
 import { Box, Divider, Typography } from "@mui/material";
+import googleCalendarIcon from "../assets/google-calendar-icon.png";
 
 const HomePage = () => {
   return (
@@ -28,7 +29,7 @@ const HomePage = () => {
         >
           <Box
             component="img"
-            src="src/assets/google-calendar-icon.png"
+            src={googleCalendarIcon}
             alt="Google Calendar"
             sx={{ width: 32, height: 32, mr: 2 }}
           />
