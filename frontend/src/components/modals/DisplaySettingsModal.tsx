@@ -31,7 +31,7 @@ const DisplaySettingsModal = ({
 }: DisplaySettingsModalProps) => {
   const {
     syncedCalendars,
-    loading,
+    isLoadingCalendars,
     selectedIds: savedSelectedIds,
     saveSelectedIds,
     currentView,
@@ -72,7 +72,7 @@ const DisplaySettingsModal = ({
 
   return (
     <ReusableModal isOpen={true} handleClose={handleClose}>
-      {!loading && (
+      {!isLoadingCalendars && (
         <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
           <Typography
             component="h2"
@@ -133,8 +133,8 @@ const DisplaySettingsModal = ({
               maxHeight: 200,
             }}
           >
-            {loading && <CircularProgress />}
-            {!loading &&
+            {isLoadingCalendars && <CircularProgress />}
+            {!isLoadingCalendars &&
               (syncedCalendars.length === 0 ? (
                 <Typography
                   sx={{ color: "text.secondary", textAlign: "center" }}
