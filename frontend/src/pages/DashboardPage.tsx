@@ -48,11 +48,6 @@ const DashboardPage = () => {
     []
   );
 
-  // If the user does not have a valid session, redirect to the home page
-  if (!session?.auth) {
-    return <Navigate to="/" replace />;
-  }
-
   // Sets the date range back by the period specified in view
   const onPrevClick = () => {
     if (view === "day") {
@@ -167,6 +162,7 @@ const DashboardPage = () => {
     selectedCalendars,
     selectedTag,
     session?.access_token,
+    session?.auth,
     API_BASE_URL,
   ]);
 
@@ -241,6 +237,11 @@ const DashboardPage = () => {
       setCurrentDate(startOfYear(currentDate));
     }
   }, [view]);
+
+  // If the user does not have a valid session, redirect to the home page
+  if (!session?.auth) {
+    return <Navigate to="/" replace />;
+  }
 
   return (
     <>
