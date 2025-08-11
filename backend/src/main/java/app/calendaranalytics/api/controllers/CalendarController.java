@@ -1,8 +1,17 @@
 package app.calendaranalytics.api.controllers;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.time.Instant;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.UUID;
+
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -35,6 +44,7 @@ public class CalendarController {
     // entity.
     private final CalendarService calendarService;
     private final String secretCronKey;
+    private static final long MAX_REQUEST_AGE_IN_SECONDS = 300;
 
     /**
      * Constructs the CalendarController with a dependency on the
@@ -128,20 +138,57 @@ public class CalendarController {
 
     /**
      * Syncs the events since the last sync date/time for all users with
-     * calendars that are marked as synced. Requires a secret key to perform the
-     * sync.
+     * calendars that are marked as synced. Requires a valid, time-based
+     * signature to authorize the sync job.
      *
-     * @param requestKey The secret key to authorize the sync job.
-     * @throws IllegalArgumentException if the key in the is incorrect.
+     * @param timestamp The timestamp from the X-Request-Timestamp header.
+     * @param signature The hex-encoded HMAC-SHA256 signature from the
+     * X-Signature-256 header.
+     * @throws IllegalArgumentException if the request is too old or the
+     * signature is invalid.
+     * @throws RuntimeException if a server-side crypto configuration error
+     * occurs.
      */
     @PostMapping("/sync-all")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void syncAllCalendarEvents(
-            @RequestHeader("X-Cron-Secret") String requestKey) {
-        if (!requestKey.equals(this.secretCronKey)) {
-            throw new IllegalArgumentException("Invalid or missing secret.");
-        }
+            @RequestHeader("X-Request-Timestamp") String timestamp,
+            @RequestHeader("X-Signature-256") String signature) {
+        verifySignature(timestamp, signature);
         calendarService.syncAllCalendarEvents();
+    }
+
+    /**
+     * Verifies the signature for the Cron Job.
+     *
+     * @param timestamp The timestamp from the X-Request-Timestamp header.
+     * @param signature The hex-encoded HMAC-SHA256 signature from the
+     * X-Signature-256 header.
+     * @throws IllegalArgumentException if the request is too old or the
+     * signature is invalid.
+     * @throws RuntimeException if a server-side crypto configuration error
+     * occurs.
+     */
+    private void verifySignature(String timestampStr, String receivedSignature) {
+        long requestTimestamp = Long.parseLong(timestampStr);
+        long now = Instant.now().getEpochSecond();
+        if (Math.abs(now - requestTimestamp) > MAX_REQUEST_AGE_IN_SECONDS) {
+            throw new IllegalArgumentException("Request timestamp is too old.");
+        }
+        try {
+            Mac mac = Mac.getInstance("HmacSHA256");
+            SecretKeySpec secretKeySpec = new SecretKeySpec(secretCronKey
+                    .getBytes(StandardCharsets.UTF_8), "HmacSHA256");
+            mac.init(secretKeySpec);
+            String stringToSign = timestampStr;
+            byte[] localSignatureBytes = mac.doFinal(stringToSign.getBytes(StandardCharsets.UTF_8));
+            byte[] receivedSignatureBytes = HexFormat.of().parseHex(receivedSignature);
+            if (!MessageDigest.isEqual(localSignatureBytes, receivedSignatureBytes)) {
+                throw new IllegalArgumentException("Invalid signature.");
+            }
+        } catch (NoSuchAlgorithmException | InvalidKeyException e) {
+            throw new RuntimeException("Server-side crypto configuration error.", e);
+        }
     }
 
     /**
