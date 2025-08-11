@@ -1,0 +1,19 @@
+name: Hourly Calendar Sync
+
+on:
+  schedule:
+    - cron: "0 * * * *"
+  workflow_dispatch: {}
+
+jobs:
+  call-api-job:
+    environment: production
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+      - name: Send request to backend
+        run: |
+          curl -X POST 'https://fullstack-calendar-analytics.onrender.com/api/v1/calendars/sync-all' \
+          -H 'Content-Type: application/json' \
+          -H 'X-CRON-SECRET: ${{ secrets.X_CRON_SECRET }}'
