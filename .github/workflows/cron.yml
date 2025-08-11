@@ -10,10 +10,14 @@ jobs:
     environment: production
     runs-on: ubuntu-latest
     steps:
-      - name: Check out code
-        uses: actions/checkout@v4
-      - name: Send request to backend
+      - name: Send signed request to backend
+        env:
+          CRON_SECRET: ${{ secrets.X_CRON_SECRET }}
+          TARGET_URL: "https://fullstack-calendar-analytics.onrender.com/api/v1/calendars/sync-all"
         run: |
-          curl -X POST 'https://fullstack-calendar-analytics.onrender.com/api/v1/calendars/sync-all' \
-          -H 'Content-Type: application/json' \
-          -H 'X-CRON-SECRET: ${{ secrets.X_CRON_SECRET }}'
+          timestamp=$(date +%s)
+          signature=$(echo -n "$timestamp" | openssl dgst -sha256 -hmac "$CRON_SECRET" -binary | xxd -p -c 256)
+          curl -X POST "$TARGET_URL" \
+          -H "Content-Type: application/json" \
+          -H "X-Request-Timestamp: $timestamp" \
+          -H "X-Signature-256: $signature"
