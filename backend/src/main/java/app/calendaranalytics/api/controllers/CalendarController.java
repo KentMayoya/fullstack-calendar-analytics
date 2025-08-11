@@ -139,7 +139,7 @@ public class CalendarController {
     public void syncAllCalendarEvents(
             @RequestHeader("X-Cron-Secret") String requestKey) {
         if (!requestKey.equals(this.secretCronKey)) {
-            throw new IllegalArgumentException("Invalid key: " + requestKey);
+            throw new IllegalArgumentException("Invalid or missing secret.");
         }
         calendarService.syncAllCalendarEvents();
     }
