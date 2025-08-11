@@ -69,6 +69,7 @@ public class SecurityConfig {
                 // Exposes "/api/test" as a public endpoint.
                 .requestMatchers("/api/test").permitAll()
                 .requestMatchers("/api/v1/calendars/sync-all").permitAll()
+                .requestMatchers("/google2a4f5746bfebafd0.html").permitAll()
                 // All other requests will require authentication.
                 .anyRequest().authenticated()
                 );
