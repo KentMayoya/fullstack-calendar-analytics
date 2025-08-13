@@ -5,6 +5,9 @@ import java.util.UUID;
 
 import lombok.Data;
 
+/**
+ * A Dto object to define the format for updating event tags endpoints.
+ */
 @Data
 public class UpdateEventTagsRequestDto {
 

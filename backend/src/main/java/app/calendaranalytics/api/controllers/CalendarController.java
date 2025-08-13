@@ -34,7 +34,7 @@ import app.calendaranalytics.api.exception.ResourceNotFoundException;
 import app.calendaranalytics.api.services.CalendarService;
 
 /**
- * Defines the API endpoint for retrieving the user's details from Supabase.
+ * Defines the API endpoint for retrieving the calendar details from Supabase.
  */
 @RestController
 @RequestMapping("/api/v1/calendars")
@@ -52,6 +52,7 @@ public class CalendarController {
      *
      * @param calendarService The service managing calendar-related business
      * logic.
+     * @param secretCronKey Secret value used for HMAC.
      */
     public CalendarController(CalendarService calendarService,
             @Value("${cron.secret-key}") String secretCronKey) {

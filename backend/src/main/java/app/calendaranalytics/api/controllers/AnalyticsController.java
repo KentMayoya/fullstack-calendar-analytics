@@ -15,6 +15,9 @@ import app.calendaranalytics.api.dtos.AnalyticsDataPointDto;
 import app.calendaranalytics.api.dtos.SummaryResponseDto;
 import app.calendaranalytics.api.services.AnalyticsService;
 
+/**
+ * Defines the API endpoint for process the data for analytics.
+ */
 @RestController
 @RequestMapping("/api/v1/analytics")
 public class AnalyticsController {

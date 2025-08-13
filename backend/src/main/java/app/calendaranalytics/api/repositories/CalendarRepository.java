@@ -13,9 +13,9 @@ import app.calendaranalytics.api.entities.Calendar;
  * An interface that provides data access methods for the Calendar entity.
  *
  * By extending JpaRepository, Spring Data JPA implements CRUD methods used to
- * query the Supabase database. JpaRepository<Calendar, UUID> tells Spring Boot
- * that Calendar's Id (annotated using @Id) is a UUID, which is compatible with
- * the Calendar object defined in the entities package.
+ * query the Supabase database. JpaRepository&lt;Calendar, UUID&gt; tells Spring
+ * Boot that Calendar's Id (annotated using @Id) is a UUID, which is compatible
+ * with the Calendar object defined in the entities package.
  */
 public interface CalendarRepository extends JpaRepository<Calendar, UUID> {
 

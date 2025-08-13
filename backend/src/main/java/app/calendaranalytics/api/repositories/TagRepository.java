@@ -15,9 +15,9 @@ import app.calendaranalytics.api.entities.User;
  * An interface that provides data access methods for the Tag entity.
  *
  * By extending JpaRepository, Spring Data JPA implements CRUD methods used to
- * query the Supabase database. JpaRepository<Tag, UUID> tells Spring Boot that
- * Tag's Id (annotated using @Id) is a UUID, which is compatible with the Tag
- * object defined in the entities package.
+ * query the Supabase database. JpaRepository&lt;Tag, UUID&gt; tells Spring Boot
+ * that Tag's Id (annotated using @Id) is a UUID, which is compatible with the
+ * Tag object defined in the entities package.
  */
 public interface TagRepository extends JpaRepository<Tag, UUID> {
 

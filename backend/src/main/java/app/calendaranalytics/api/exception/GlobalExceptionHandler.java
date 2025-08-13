@@ -9,6 +9,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+/**
+ * Global exception handler that intercepts all thrown exceptions and formats
+ * them into a standardized response before sending them to the frontend.
+ */
 @ControllerAdvice
 public class GlobalExceptionHandler {
 

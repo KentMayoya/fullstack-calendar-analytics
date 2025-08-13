@@ -19,12 +19,15 @@ import com.google.api.services.calendar.model.Events;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.UserCredentials;
 
+/**
+ * A Service class that handles business logic that utilizes the Google Calendar
+ * API.
+ */
 @Service
 public class GoogleCalendarService {
 
     private final String clientId;
     private final String clientSecret;
-    private final EncryptionService encryptionService;
 
     /**
      * Initializes Google Cloud's clientId and clientSecret constructs a
@@ -41,7 +44,6 @@ public class GoogleCalendarService {
     ) {
         this.clientId = clientId;
         this.clientSecret = clientSecret;
-        this.encryptionService = encryptionService;
     }
 
     /**
@@ -96,7 +98,8 @@ public class GoogleCalendarService {
      * @param googleCalendarId The Google Calendar id the events are related to.
      * @param lastSyncedAt The last time the calendar was synced. May be null if
      * the calendar has never been synced yet.
-     * @return
+     * @return A list of Events related to the google calendar since the last
+     * sync.
      * @throws IOException If Google Auth library fails to refresh token.
      */
     public List<Event> getCalendarEventsSinceLastSync(String refreshToken,

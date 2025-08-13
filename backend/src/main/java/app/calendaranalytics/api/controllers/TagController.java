@@ -21,6 +21,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import app.calendaranalytics.api.dtos.TagDto;
 import app.calendaranalytics.api.dtos.UpsertTagRequestDto;
 import app.calendaranalytics.api.exception.DuplicateResourceException;
+import app.calendaranalytics.api.exception.ResourceNotFoundException;
 import app.calendaranalytics.api.services.TagService;
 
 /**

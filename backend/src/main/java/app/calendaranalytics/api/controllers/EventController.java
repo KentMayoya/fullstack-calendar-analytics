@@ -22,6 +22,9 @@ import app.calendaranalytics.api.dtos.UpdateEventTagsRequestDto;
 import app.calendaranalytics.api.exception.ResourceNotFoundException;
 import app.calendaranalytics.api.services.EventService;
 
+/**
+ * Defines the API endpoint for retrieving the event details from Supabase.
+ */
 @RestController
 @RequestMapping("/api/v1/events")
 public class EventController {
@@ -50,6 +53,8 @@ public class EventController {
      * @param authentication An object provided by the Spring Security
      * framework. Contains all the information regarding the currently logged-in
      * user.
+     * @return A list of EventDtos found based on the specified filters and a
+     * 200 OK Status Code.
      */
     @GetMapping
     public ResponseEntity<List<EventDto>> getEvents(

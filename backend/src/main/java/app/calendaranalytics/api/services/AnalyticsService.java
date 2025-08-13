@@ -91,8 +91,8 @@ public class AnalyticsService {
      * range (e.g. a week is broken down into each day).
      *
      * @param userId The related user id to retrieve event analytics for.
-     * @param start Start date filter.
-     * @param end End date filter.
+     * @param range The range for the breakdown.
+     * @param date A date within a range.
      * @param calendarIds The calendar ids to search for events.
      * @param tagId The tag id used to search for events.
      * @return An AnalyticsDataPointDto with the total number of minutes for

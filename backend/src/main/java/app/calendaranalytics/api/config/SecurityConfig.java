@@ -37,7 +37,10 @@ public class SecurityConfig {
     @Value("${supabase.jwt.secret}")
     private String jwtSecret;
 
-    // Configures the JWTDecoder with a secret key for verifying the JWT signature
+    /**
+     * Configures the JWTDecoder with a secret key for verifying the JWT
+     * signature
+     */
     @Bean
     public JwtDecoder jwtDecoder() {
         SecretKeySpec secretKey = new SecretKeySpec(jwtSecret

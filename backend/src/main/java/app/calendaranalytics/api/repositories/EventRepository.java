@@ -16,9 +16,9 @@ import app.calendaranalytics.api.entities.Event;
  * An interface that provides data access methods for the Event entity.
  *
  * By extending JpaRepository, Spring Data JPA implements CRUD methods used to
- * query the Supabase database. JpaRepository<Event, UUID> tells Spring Boot
- * that Event's Id (annotated using @Id) is a UUID, which is compatible with the
- * Event object defined in the entities package.
+ * query the Supabase database. JpaRepository&lt;Event, UUID&gt; tells Spring
+ * Boot that Event's Id (annotated using @Id) is a UUID, which is compatible
+ * with the Event object defined in the entities package.
  */
 public interface EventRepository extends JpaRepository<Event, UUID> {
 
@@ -50,8 +50,9 @@ public interface EventRepository extends JpaRepository<Event, UUID> {
      * Retrieves all Event entities that match the google event ids and
      * calendar.
      *
-     * @param googleEventId The google event ids to search for.
+     * @param googleEventIds The google event ids to search for.
      * @param calendar The Calendar the events belongs to.
+     * @return A list of Events related to the specified calendars.
      */
     public List<Event> findAllByGoogleEventIdInAndCalendar(List<String> googleEventIds,
             Calendar calendar);
@@ -61,7 +62,7 @@ public interface EventRepository extends JpaRepository<Event, UUID> {
      * event id.
      *
      * @param userId The user id related to the event.
-     * @param id The event id to query for.
+     * @param eventId The event id to query for.
      * @return An Event, if it exists.
      */
     @Query("""
