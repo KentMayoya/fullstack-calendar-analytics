@@ -34,5 +34,5 @@ Yes, I am sure there are existing resources that summarize Google Calendar event
 - Learn how to deploy a website onto the internet.
 
 ## How To Use
-Video Demo: <br>
+Video Demo: https://www.youtube.com/watch?v=v2CAHiBrH5s <br>
 Visit the deployed web application here: https://calendar-analytics.netlify.app/
