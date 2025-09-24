@@ -87,11 +87,6 @@ const HomePage = () => {
           browser and is designed for mobile devices. Just open the website on
           your phone and start analyzing your calendar.
         </Typography>
-        <Divider sx={{ my: 2 }} />
-        <Typography variant="body2" color="text.secondary">
-          Google Calendar™ is a trademark of Google LLC. This application is not
-          affiliated with or endorsed by Google LLC.
-        </Typography>
       </Box>
     </>
   );
