@@ -1,4 +1,4 @@
-import { Box, Divider, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import googleCalendarIcon from "../assets/google-calendar-icon.png";
 
 const HomePage = () => {
