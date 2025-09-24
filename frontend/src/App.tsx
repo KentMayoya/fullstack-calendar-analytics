@@ -1,6 +1,7 @@
 import "./App.css";
 import { Routes, Route } from "react-router-dom";
 import Header from "./components/layouts/Header";
+import Footer from "./components/layouts/Footer";
 import HomePage from "./pages/HomePage";
 import CalendarPage from "./pages/CalendarPage";
 import DashboardPage from "./pages/DashboardPage";
@@ -50,6 +51,7 @@ function App() {
           <Route path="/health" element={<BackendMessage />} />
         </Routes>
       </main>
+      <Footer />
     </>
   );
 }

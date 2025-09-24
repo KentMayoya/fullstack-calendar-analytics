@@ -7,6 +7,6 @@ supabase.url=your-supabase-url
 supabase.service.role.key=your-supabase-service-role-key
 google.client.id=your-google-client-id
 google.client.secret=your-google-client-secret
-app.encryption.key=your-secret-key
+google.verification.file.path=your-file-path
 app.encryption.key=your-encryption-key
 cron.secret-key=your-cron-secret-key
