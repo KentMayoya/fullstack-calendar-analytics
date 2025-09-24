@@ -37,10 +37,6 @@ public class SecurityConfig {
     @Value("${supabase.jwt.secret}")
     private String jwtSecret;
 
-    // Retrieves Google verification file path from application.properties
-    @Value("${google.verification.file.path}")
-    private String googleVerificationFilePath;
-
     /**
      * Configures the JWTDecoder with a secret key for verifying the JWT
      * signature
@@ -76,9 +72,6 @@ public class SecurityConfig {
                 // Exposes "/api/test" as a public endpoint.
                 .requestMatchers("/api/test").permitAll()
                 .requestMatchers("/api/v1/calendars/sync-all").permitAll()
-                // Exposes the Google verification file as a public endpoint.
-                // This is required so Google can access the file for site verification.
-                .requestMatchers(googleVerificationFilePath).permitAll()
                 // All other requests will require authentication.
                 .anyRequest().authenticated()
                 );
