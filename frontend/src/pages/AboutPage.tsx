@@ -95,7 +95,7 @@ const AboutPage = () => {
         The development journey for this web application is extensively
         documented. If you are interested, you can read the documentation{" "}
         <Link
-          href="https://docs.google.com/document/d/1uAhBEbnVo524cUPpnkbll7U3qjt4Nu-vk5zrtT3WKsg"
+          href="https://drive.google.com/file/d/1hkbZbdGKpUTbAwrKVQhOcGDfLVOBMA9d/view"
           target="_blank"
           rel="noopener"
         >
